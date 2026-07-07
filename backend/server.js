@@ -24,6 +24,7 @@ import Category from './models/Category.js';
 dotenv.config();
 
 const app = express();
+app.set("trust proxy", 1);
 const PORT = process.env.PORT || 5000;
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/bhawna_closet';
 
@@ -52,6 +53,7 @@ app.use(express.json());
 // Serve static uploads for local testing fallback
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Register API Routes
@@ -72,7 +74,13 @@ app.get('/api/health', (req, res) => {
     database: mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected'
   });
 });
+app.use(express.static(path.join(__dirname, "public")));
 
+app.get("*", (req, res) => {
+  if (!req.path.startsWith("/api")) {
+    res.sendFile(path.join(__dirname, "public", "index.html"));
+  }
+});
 // 404 & Centralized Error Handler
 app.use(notFound);
 app.use(errorHandler);
@@ -124,3 +132,5 @@ mongoose.connect(MONGODB_URI)
     console.error(`MongoDB connection failed: ${err.message}`);
     process.exit(1);
   });
+
+export default app;
