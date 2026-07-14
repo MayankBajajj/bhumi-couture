@@ -32,7 +32,12 @@ export default function CartPage({ onContinueShopping, onSelectProductBySlug }) 
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setAddressForm(prev => ({ ...prev, [name]: value }));
+    if (name === 'phone') {
+      const cleanVal = value.replace(/\D/g, '').slice(0, 10);
+      setAddressForm(prev => ({ ...prev, [name]: cleanVal }));
+    } else {
+      setAddressForm(prev => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleQtyChange = async (item, newQty) => {
@@ -76,6 +81,11 @@ export default function CartPage({ onContinueShopping, onSelectProductBySlug }) 
     e.preventDefault();
     if (!addressForm.name || !addressForm.phone || !addressForm.street || !addressForm.city || !addressForm.state || !addressForm.pincode) {
       setOrderError('Please fill in all shipping details.');
+      return;
+    }
+
+    if (addressForm.phone.length !== 10) {
+      setOrderError('Please enter a valid 10-digit phone number.');
       return;
     }
 
@@ -555,7 +565,7 @@ export default function CartPage({ onContinueShopping, onSelectProductBySlug }) 
                 </div>
 
                 <button type="submit" className="btn btn-primary btn-checkout" disabled={checkingOut}>
-                  {checkingOut ? 'Submitting Order...' : 'Place Order (COD)'} <ArrowRight size={18} />
+                  {checkingOut ? 'Submitting Order...' : (addressForm.paymentMethod === 'COD' ? 'Place Order (COD)' : 'Place Order')} <ArrowRight size={18} />
                 </button>
               </div>
             </form>
