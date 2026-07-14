@@ -2,7 +2,6 @@ import Order from '../models/Order.js';
 import WebhookLog from '../models/WebhookLog.js';
 import { syncTrackingFromShiprocket } from '../services/shiprocketService.js';
 
-// 1. Shiprocket Webhook (Real-time tracking updates)
 export const shiprocketWebhook = async (req, res, next) => {
   try {
     const token = req.headers['x-api-key'];
@@ -11,21 +10,38 @@ export const shiprocketWebhook = async (req, res, next) => {
     console.log('Shiprocket Webhook Headers:', req.headers);
     console.log('Shiprocket Webhook Body:', req.body);
 
+    const payload = req.body || {};
+    const localOrderId = payload.order_id;
+
+    // Check if it's a test ping (missing order_id, invalid format, or order not found in database)
+    // Return 200 OK directly so Shiprocket validation saves successfully without exposing DB updates
+    if (!localOrderId) {
+      console.log('Bypassing verification check: No order_id provided.');
+      return res.status(200).send('OK');
+    }
+
+    let order;
+    try {
+      order = await Order.findById(localOrderId);
+    } catch (err) {
+      console.log('Bypassing verification check: Invalid order_id format.');
+      return res.status(200).send('OK');
+    }
+
+    if (!order) {
+      console.log(`Bypassing verification check: Order ${localOrderId} not found in database.`);
+      return res.status(200).send('OK');
+    }
+
+    // Now strictly verify auth token for real order database updates
     const tokenClean = token ? token.trim() : '';
     const webhookTokenClean = webhookToken ? webhookToken.trim() : '';
 
     if (!tokenClean || tokenClean !== webhookTokenClean) {
       console.warn('Unauthorized Shiprocket webhook callback attempt.');
-      // Bypass token check for test pings (no order_id or empty payload) so verification saves successfully
-      if (!req.body || Object.keys(req.body).length === 0 || req.body.event === 'test' || !req.body.order_id) {
-        console.log('Bypassing verification check for Shiprocket test ping.');
-        return res.status(200).send('OK');
-      }
       return res.status(401).send('Unauthorized');
     }
 
-    const payload = req.body;
-    
     // Save to WebhookLog
     const log = await WebhookLog.create({
       provider: 'Shiprocket',

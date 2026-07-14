@@ -96,9 +96,11 @@ app.get('/api/health', (req, res) => {
 });
 app.use(express.static(path.join(__dirname, "public")));
 
-app.get("*", (req, res) => {
+app.get("*", (req, res, next) => {
   if (!req.path.startsWith("/api")) {
     res.sendFile(path.join(__dirname, "public", "index.html"));
+  } else {
+    next();
   }
 });
 // 404 & Centralized Error Handler
