@@ -32,9 +32,20 @@ app.set("trust proxy", 1);
 const PORT = process.env.PORT || 5000;
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/bhawna_closet';
 
-// Production Security Middlewares (allow cross-origin resource sharing for local asset uploads)
+// Production Security Middlewares (allow cross-origin resource sharing and whitelist external assets)
 app.use(helmet({
-  crossOriginResourcePolicy: { policy: "cross-origin" }
+  crossOriginResourcePolicy: { policy: "cross-origin" },
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://checkout.razorpay.com"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      imgSrc: ["'self'", "data:", "https://res.cloudinary.com", "https://images.unsplash.com"],
+      connectSrc: ["'self'", "https://api.razorpay.com", "https://lumberjack.razorpay.com"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      frameSrc: ["'self'", "https://api.razorpay.com", "https://checkout.razorpay.com"],
+    }
+  }
 }));
 
 // Configure Rate Limiting
