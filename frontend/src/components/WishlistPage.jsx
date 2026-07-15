@@ -127,6 +127,31 @@ export default function WishlistPage({ onContinueShopping, onSelectProduct }) {
           border-color: #dc3545;
           color: #c82333;
         }
+        @media (max-width: 576px) {
+          .wishlist-view {
+            padding-top: 1rem !important;
+            padding-bottom: 1.5rem !important;
+          }
+          .wishlist-banner {
+            padding: 1rem 0.75rem !important;
+            margin-bottom: 1rem !important;
+          }
+          .wishlist-banner h1 {
+            font-size: 1.5rem !important;
+            margin-bottom: 0 !important;
+          }
+          .wishlist-banner p {
+            display: none !important;
+          }
+          .wishlist-cards-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 0.75rem !important;
+          }
+          .wishlist-count {
+            font-size: 0.8rem !important;
+            margin-bottom: 0.85rem !important;
+          }
+        }
       `}</style>
     </main>
   );

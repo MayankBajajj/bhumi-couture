@@ -1107,16 +1107,24 @@ export default function CartPage({ onContinueShopping, onSelectProductBySlug }) 
           }
         }
         @media (max-width: 576px) {
+          .cart-view {
+            padding-top: 1rem !important;
+            padding-bottom: 1.5rem !important;
+          }
           .form-row-double, .form-row-triple {
             grid-template-columns: 1fr;
             gap: 1.25rem;
           }
           .cart-banner {
-            padding: 2rem 1.25rem !important;
-            margin-bottom: 1.5rem !important;
+            padding: 1rem 0.75rem !important;
+            margin-bottom: 1rem !important;
           }
           .cart-banner h1 {
-            font-size: 1.8rem !important;
+            font-size: 1.5rem !important;
+            margin-bottom: 0 !important;
+          }
+          .cart-banner p {
+            display: none !important;
           }
           .cart-summary-panel, .checkout-form-panel {
             padding: 1.25rem !important;

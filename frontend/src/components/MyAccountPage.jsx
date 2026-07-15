@@ -821,6 +821,50 @@ export default function MyAccountPage() {
             grid-template-columns: 1fr;
           }
         }
+        @media (max-width: 576px) {
+          .my-account-view {
+            padding-top: 1rem !important;
+            padding-bottom: 1.5rem !important;
+          }
+          .profile-banner {
+            padding: 1rem 0.75rem !important;
+            margin-bottom: 1rem !important;
+          }
+          .profile-banner h1 {
+            font-size: 1.5rem !important;
+            margin-bottom: 0 !important;
+          }
+          .profile-banner p {
+            display: none !important;
+          }
+          .profile-details-card {
+            padding: 1.25rem !important;
+          }
+          .order-card {
+            padding: 1.25rem !important;
+          }
+          .order-card-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+          }
+          .order-tracking-box {
+            padding: 0.75rem !important;
+          }
+          .tracking-header {
+            flex-direction: column;
+            gap: 0.25rem;
+          }
+          .event-header {
+            flex-direction: column;
+            gap: 0.15rem;
+          }
+          .order-card-footer {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+          }
+        }
       `}</style>
     </main>
   );
