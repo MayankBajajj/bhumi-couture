@@ -12,6 +12,8 @@ export default function ProductDetailPage({ productSlug, onBack, onSelectProduct
   const [errorMsg, setErrorMsg] = useState('');
   
   const [selectedImage, setSelectedImage] = useState('');
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
   const [selectedSize, setSelectedSize] = useState('');
   const [selectedColor, setSelectedColor] = useState('');
   
@@ -145,7 +147,11 @@ export default function ProductDetailPage({ productSlug, onBack, onSelectProduct
         <div className="detail-grid">
           {/* Left Column: Image Gallery */}
           <div className="gallery-section">
-            <div className="main-image-box glass-card">
+            <div className="main-image-box glass-card" style={{ cursor: 'zoom-in' }} onClick={() => {
+              const idx = imagesList.indexOf(selectedImage);
+              setLightboxIndex(idx >= 0 ? idx : 0);
+              setIsLightboxOpen(true);
+            }}>
               <img src={selectedImage} alt={product.name} className="main-image" />
               {product.isNewArrival && <span className="detail-badge badge badge-pink position-badge">New Arrival</span>}
             </div>
@@ -299,6 +305,46 @@ export default function ProductDetailPage({ productSlug, onBack, onSelectProduct
           </section>
         )}
       </div>
+
+      {/* Lightbox Fullscreen Photo Gallery Overlay */}
+      {isLightboxOpen && (
+        <div className="image-lightbox-overlay" onClick={() => setIsLightboxOpen(false)}>
+          <button className="lightbox-close-btn" onClick={() => setIsLightboxOpen(false)}>
+            &times;
+          </button>
+          
+          {imagesList.length > 1 && (
+            <button 
+              className="lightbox-nav-btn prev-btn" 
+              onClick={(e) => {
+                e.stopPropagation();
+                setLightboxIndex((prev) => (prev === 0 ? imagesList.length - 1 : prev - 1));
+              }}
+            >
+              &#10094;
+            </button>
+          )}
+          
+          <div className="lightbox-content" onClick={(e) => e.stopPropagation()}>
+            <img src={imagesList[lightboxIndex]} alt={`${product.name} full view`} className="lightbox-image" />
+            <div className="lightbox-counter">
+              {lightboxIndex + 1} / {imagesList.length}
+            </div>
+          </div>
+          
+          {imagesList.length > 1 && (
+            <button 
+              className="lightbox-nav-btn next-btn" 
+              onClick={(e) => {
+                e.stopPropagation();
+                setLightboxIndex((prev) => (prev === imagesList.length - 1 ? 0 : prev + 1));
+              }}
+            >
+              &#10095;
+            </button>
+          )}
+        </div>
+      )}
 
       <style>{`
         .detail-loading-container {
@@ -690,6 +736,104 @@ export default function ProductDetailPage({ productSlug, onBack, onSelectProduct
             width: 44px !important;
             height: 44px !important;
             border-radius: 8px !important;
+          }
+        }
+
+        /* Fullscreen Lightbox Photo Gallery */
+        .image-lightbox-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.95);
+          z-index: 99999;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          animation: fadeIn 0.2s ease-out;
+        }
+        .lightbox-close-btn {
+          position: absolute;
+          top: 25px;
+          right: 30px;
+          background: transparent;
+          color: #fff;
+          border: none;
+          font-size: 3.5rem;
+          line-height: 1;
+          cursor: pointer;
+          z-index: 100000;
+          transition: color 0.2s;
+        }
+        .lightbox-close-btn:hover {
+          color: var(--primary-pink);
+        }
+        .lightbox-nav-btn {
+          position: absolute;
+          background: rgba(255, 255, 255, 0.1);
+          color: #fff;
+          border: none;
+          width: 60px;
+          height: 60px;
+          font-size: 1.75rem;
+          border-radius: 50%;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 100000;
+          transition: all 0.2s;
+        }
+        .lightbox-nav-btn:hover {
+          background: var(--primary-pink);
+          transform: scale(1.08);
+        }
+        .prev-btn {
+          left: 40px;
+        }
+        .next-btn {
+          right: 40px;
+        }
+        .lightbox-content {
+          position: relative;
+          max-width: 80%;
+          max-height: 80%;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+        }
+        .lightbox-image {
+          max-width: 100%;
+          max-height: 75vh;
+          object-fit: contain;
+          border-radius: 8px;
+          box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+        }
+        .lightbox-counter {
+          color: #aaa;
+          font-size: 0.95rem;
+          margin-top: 1.25rem;
+          font-weight: 500;
+        }
+        @media (max-width: 768px) {
+          .lightbox-nav-btn {
+            width: 44px;
+            height: 44px;
+            font-size: 1.25rem;
+          }
+          .prev-btn {
+            left: 20px;
+          }
+          .next-btn {
+            right: 20px;
+          }
+          .lightbox-content {
+            max-width: 90%;
+          }
+          .lightbox-image {
+            max-height: 65vh;
           }
         }
       `}</style>
