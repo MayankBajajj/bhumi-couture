@@ -3,11 +3,58 @@ import User from '../models/User.js';
 import Otp from '../models/Otp.js';
 import { sendEmail } from '../services/emailService.js';
 
+const validateEmailDomain = (email) => {
+  if (!email || typeof email !== 'string') {
+    return { valid: false, message: 'Please provide an email address' };
+  }
+  
+  // Standard Email Regex
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return { valid: false, message: 'Please enter a valid email format' };
+  }
+  
+  const domain = email.split('@')[1].toLowerCase();
+  
+  // Blacklisted disposable / test domains
+  const blacklistedDomains = [
+    'yopmail.com', 'yopmail.fr', 'yopmail.net', 'yopmail.org', 'yopmail.co.uk',
+    'mailinator.com',
+    'tempmail.com', 'temp-mail.org', 'temp-mail.com',
+    '10minutemail.com', '10minutemail.co.za',
+    'dispostable.com',
+    'guerrillamail.com', 'guerrillamail.net', 'guerrillamail.org',
+    'sharklasers.com',
+    'getairmail.com',
+    'burnermail.io',
+    'trashmail.com',
+    'test.com', 'example.com', 'dummy.com', 'mock.com'
+  ];
+  
+  const isBlacklisted = blacklistedDomains.includes(domain) || 
+                        blacklistedDomains.some(black => domain.endsWith('.' + black));
+                        
+  if (isBlacklisted) {
+    return { 
+      valid: false, 
+      message: 'Disposable or dummy email domains are not allowed. Please use a valid personal email (e.g. @gmail.com, @yahoo.com, etc.).' 
+    };
+  }
+  
+  return { valid: true };
+};
+
 export const sendOtpController = async (req, res, next) => {
   try {
     const { email } = req.body;
     if (!email) {
       return res.status(400).json({ message: 'Please provide an email address' });
+    }
+    
+    // Validate email format and domain
+    const validation = validateEmailDomain(email);
+    if (!validation.valid) {
+      return res.status(400).json({ message: validation.message });
     }
     
     // Check if user already exists
@@ -110,6 +157,11 @@ export const updateProfile = async (req, res, next) => {
     user.name = req.body.name || user.name;
     
     if (req.body.email && req.body.email !== user.email) {
+      const validation = validateEmailDomain(req.body.email);
+      if (!validation.valid) {
+        return res.status(400).json({ message: validation.message });
+      }
+
       const emailExists = await User.findOne({ email: req.body.email.toLowerCase() });
       if (emailExists) {
         return res.status(400).json({ message: 'Email is already in use' });
