@@ -1,122 +1,32 @@
 import { registerUser, loginUser, generateToken } from '../services/userService.js';
 import User from '../models/User.js';
-import Otp from '../models/Otp.js';
-import { sendEmail } from '../services/emailService.js';
-
-const validateEmailDomain = (email) => {
-  if (!email || typeof email !== 'string') {
-    return { valid: false, message: 'Please provide an email address' };
-  }
-  
-  // Standard Email Regex
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) {
-    return { valid: false, message: 'Please enter a valid email format' };
-  }
-  
-  const domain = email.split('@')[1].toLowerCase();
-  
-  // Blacklisted disposable / test domains
-  const blacklistedDomains = [
-    'yopmail.com', 'yopmail.fr', 'yopmail.net', 'yopmail.org', 'yopmail.co.uk',
-    'mailinator.com',
-    'tempmail.com', 'temp-mail.org', 'temp-mail.com',
-    '10minutemail.com', '10minutemail.co.za',
-    'dispostable.com',
-    'guerrillamail.com', 'guerrillamail.net', 'guerrillamail.org',
-    'sharklasers.com',
-    'getairmail.com',
-    'burnermail.io',
-    'trashmail.com',
-    'test.com', 'example.com', 'dummy.com', 'mock.com'
-  ];
-  
-  const isBlacklisted = blacklistedDomains.includes(domain) || 
-                        blacklistedDomains.some(black => domain.endsWith('.' + black));
-                        
-  if (isBlacklisted) {
-    return { 
-      valid: false, 
-      message: 'Disposable or dummy email domains are not allowed. Please use a valid personal email (e.g. @gmail.com, @yahoo.com, etc.).' 
-    };
-  }
-  
-  return { valid: true };
-};
-
-export const sendOtpController = async (req, res, next) => {
-  try {
-    const { email } = req.body;
-    if (!email) {
-      return res.status(400).json({ message: 'Please provide an email address' });
-    }
-    
-    // Validate email format and domain
-    const validation = validateEmailDomain(email);
-    if (!validation.valid) {
-      return res.status(400).json({ message: validation.message });
-    }
-    
-    // Check if user already exists
-    const emailExists = await User.findOne({ email: email.toLowerCase() });
-    if (emailExists) {
-      return res.status(400).json({ message: 'Email is already registered' });
-    }
-    
-    // Generate 6-digit numeric OTP
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    
-    // Save to DB (expires in 5 minutes)
-    await Otp.findOneAndUpdate(
-      { email: email.toLowerCase() },
-      { otp, createdAt: Date.now() },
-      { upsert: true, new: true }
-    );
-    
-    // Send email
-    const subject = 'Verify Your Bhawna Closet Account';
-    const text = `Hello,
-
-Thank you for choosing Bhawna Closet!
-
-To complete your sign-up verification, please enter the following One-Time Password (OTP) in the verification box:
-
-Verification Code: ${otp}
-
-This OTP is valid for 5 minutes and should not be shared with anyone.
-
-Best regards,
-Bhawna Closet Team`;
-
-    await sendEmail(email.toLowerCase(), subject, text);
-    
-    res.json({ message: 'OTP verification code sent to your email.' });
-  } catch (error) {
-    res.status(500);
-    next(error);
-  }
-};
+import { verifyFirebaseIdToken } from '../utils/firebaseAuth.js';
 
 export const register = async (req, res, next) => {
   try {
-    const { name, email, password, otp } = req.body;
-    if (!name || !email || !password || !otp) {
-      return res.status(400).json({ message: 'Please fill in all fields including the OTP' });
+    const { name, phone, password, firebaseToken } = req.body;
+    if (!name || !phone || !password || !firebaseToken) {
+      return res.status(400).json({ message: 'Please fill in all fields' });
     }
     if (password.length < 6) {
       return res.status(400).json({ message: 'Password must be at least 6 characters' });
     }
-    
-    // Verify OTP
-    const record = await Otp.findOne({ email: email.toLowerCase() });
-    if (!record || record.otp !== otp) {
-      return res.status(400).json({ message: 'Invalid or expired OTP code' });
+
+    // Verify Firebase ID token
+    const decoded = await verifyFirebaseIdToken(firebaseToken);
+    const tokenPhone = decoded.phone_number;
+    if (!tokenPhone) {
+      return res.status(400).json({ message: 'Token does not contain a verified phone number' });
     }
-    
-    // Success: Delete the OTP so it cannot be reused
-    await Otp.deleteOne({ email: email.toLowerCase() });
-    
-    const result = await registerUser(name, email, password);
+
+    // Ensure phone numbers match
+    const normalizedTokenPhone = tokenPhone.replace(/\D/g, '');
+    const normalizedInputPhone = phone.replace(/\D/g, '');
+    if (!normalizedTokenPhone.endsWith(normalizedInputPhone)) {
+      return res.status(400).json({ message: 'Phone number mismatch with verification token' });
+    }
+
+    const result = await registerUser(name, tokenPhone, password);
     res.status(201).json(result);
   } catch (error) {
     res.status(400);
@@ -126,14 +36,61 @@ export const register = async (req, res, next) => {
 
 export const login = async (req, res, next) => {
   try {
-    const { email, password } = req.body;
-    if (!email || !password) {
+    const { phone, password } = req.body;
+    if (!phone || !password) {
       return res.status(400).json({ message: 'Please fill in all fields' });
     }
-    const result = await loginUser(email, password);
+    
+    // Normalize input phone number
+    let normalizedPhone = phone.trim();
+    if (!normalizedPhone.startsWith('+')) {
+      if (normalizedPhone.length === 10) {
+        normalizedPhone = `+91${normalizedPhone}`;
+      } else {
+        return res.status(400).json({ message: 'Please enter a valid phone number with country code (e.g. +91XXXXXXXXXX)' });
+      }
+    }
+
+    const result = await loginUser(normalizedPhone, password);
     res.json(result);
   } catch (error) {
     res.status(401);
+    next(error);
+  }
+};
+
+export const loginOtp = async (req, res, next) => {
+  try {
+    const { phone, firebaseToken } = req.body;
+    if (!phone || !firebaseToken) {
+      return res.status(400).json({ message: 'Please provide phone and firebase verification token' });
+    }
+
+    const decoded = await verifyFirebaseIdToken(firebaseToken);
+    const tokenPhone = decoded.phone_number;
+    if (!tokenPhone) {
+      return res.status(400).json({ message: 'Token does not contain a verified phone number' });
+    }
+
+    const normalizedTokenPhone = tokenPhone.replace(/\D/g, '');
+    const normalizedInputPhone = phone.replace(/\D/g, '');
+    if (!normalizedTokenPhone.endsWith(normalizedInputPhone)) {
+      return res.status(400).json({ message: 'Phone number mismatch with verification token' });
+    }
+
+    const user = await User.findOne({ phone: tokenPhone });
+    if (!user) {
+      return res.status(404).json({ message: 'Phone number is not registered. Please sign up first.' });
+    }
+
+    res.json({
+      _id: user._id,
+      name: user.name,
+      phone: user.phone,
+      token: generateToken(user._id)
+    });
+  } catch (error) {
+    res.status(400);
     next(error);
   }
 };
@@ -156,24 +113,24 @@ export const updateProfile = async (req, res, next) => {
     
     user.name = req.body.name || user.name;
     
-    if (req.body.email && req.body.email !== user.email) {
-      const validation = validateEmailDomain(req.body.email);
-      if (!validation.valid) {
-        return res.status(400).json({ message: validation.message });
+    if (req.body.phone && req.body.phone !== user.phone) {
+      let normalizedPhone = req.body.phone.trim();
+      if (!normalizedPhone.startsWith('+') && normalizedPhone.length === 10) {
+        normalizedPhone = `+91${normalizedPhone}`;
       }
-
-      const emailExists = await User.findOne({ email: req.body.email.toLowerCase() });
-      if (emailExists) {
-        return res.status(400).json({ message: 'Email is already in use' });
+      
+      const phoneExists = await User.findOne({ phone: normalizedPhone });
+      if (phoneExists) {
+        return res.status(400).json({ message: 'Phone number is already in use' });
       }
-      user.email = req.body.email;
+      user.phone = normalizedPhone;
     }
     
     const updatedUser = await user.save();
     res.json({
       _id: updatedUser._id,
       name: updatedUser.name,
-      email: updatedUser.email
+      phone: updatedUser.phone
     });
   } catch (error) {
     res.status(400);
@@ -210,91 +167,44 @@ export const changePassword = async (req, res, next) => {
   }
 };
 
-export const forgotPassword = async (req, res, next) => {
-  try {
-    const { email } = req.body;
-    if (!email) {
-      return res.status(400).json({ message: 'Please provide an email address' });
-    }
-
-    // Check if user is registered
-    const user = await User.findOne({ email: email.toLowerCase() });
-    if (!user) {
-      return res.status(404).json({ message: 'Email address not registered' });
-    }
-
-    // Generate 6-digit numeric OTP
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-
-    // Save/Update to Otp collection (expires in 5 minutes)
-    await Otp.findOneAndUpdate(
-      { email: email.toLowerCase() },
-      { otp, createdAt: Date.now() },
-      { upsert: true, new: true }
-    );
-
-    // Send email
-    const subject = 'Reset Password OTP - Bhawna Closet';
-    const text = `Hello,
-
-We received a request to reset your password for your Bhawna Closet account.
-
-Please enter the following One-Time Password (OTP) code to verify your request:
-
-OTP Code: ${otp}
-
-This OTP is valid for 5 minutes. If you did not request this password reset, please ignore this email.
-
-Best regards,
-Bhawna Closet Team`;
-
-    await sendEmail(email.toLowerCase(), subject, text);
-
-    res.status(200).json({ message: 'Password reset OTP verification code sent to your email.' });
-  } catch (error) {
-    res.status(500);
-    next(error);
-  }
-};
-
 export const resetPassword = async (req, res, next) => {
   try {
-    const { email, otp, newPassword } = req.body;
-    if (!email || !otp || !newPassword) {
-      return res.status(400).json({ message: 'Please provide email, OTP code, and new password' });
+    const { phone, newPassword, firebaseToken } = req.body;
+    if (!phone || !newPassword || !firebaseToken) {
+      return res.status(400).json({ message: 'Please provide phone number, new password, and firebase verification token' });
     }
     if (newPassword.length < 6) {
       return res.status(400).json({ message: 'Password must be at least 6 characters' });
     }
 
-    // Check if user is registered
-    const user = await User.findOne({ email: email.toLowerCase() });
+    const decoded = await verifyFirebaseIdToken(firebaseToken);
+    const tokenPhone = decoded.phone_number;
+    if (!tokenPhone) {
+      return res.status(400).json({ message: 'Token does not contain a verified phone number' });
+    }
+
+    const normalizedTokenPhone = tokenPhone.replace(/\D/g, '');
+    const normalizedInputPhone = phone.replace(/\D/g, '');
+    if (!normalizedTokenPhone.endsWith(normalizedInputPhone)) {
+      return res.status(400).json({ message: 'Phone number mismatch with verification token' });
+    }
+
+    const user = await User.findOne({ phone: tokenPhone });
     if (!user) {
-      return res.status(404).json({ message: 'Email address not registered' });
+      return res.status(404).json({ message: 'Phone number is not registered' });
     }
 
-    // Verify OTP
-    const record = await Otp.findOne({ email: email.toLowerCase() });
-    if (!record || record.otp !== otp) {
-      return res.status(400).json({ message: 'Invalid or expired OTP code' });
-    }
-
-    // Delete OTP
-    await Otp.deleteOne({ email: email.toLowerCase() });
-
-    // Update password
     user.password = newPassword;
     await user.save();
 
-    // Auto-login user
-    res.status(200).json({
+    res.json({
       _id: user._id,
       name: user.name,
-      email: user.email,
+      phone: user.phone,
       token: generateToken(user._id)
     });
   } catch (error) {
-    res.status(500);
+    res.status(400);
     next(error);
   }
 };

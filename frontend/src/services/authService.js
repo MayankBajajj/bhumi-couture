@@ -1,24 +1,24 @@
 import { request } from './api';
 
 export const authService = {
-  login: async (email, password) => {
+  login: async (phone, password) => {
     return await request('/auth/login', {
       method: 'POST',
-      body: JSON.stringify({ email, password })
+      body: JSON.stringify({ phone, password })
     });
   },
 
-  sendOtp: async (email) => {
-    return await request('/auth/send-otp', {
+  loginOtp: async (phone, firebaseToken) => {
+    return await request('/auth/login-otp', {
       method: 'POST',
-      body: JSON.stringify({ email })
+      body: JSON.stringify({ phone, firebaseToken })
     });
   },
 
-  register: async (name, email, password, otp) => {
+  register: async (name, phone, password, firebaseToken) => {
     return await request('/auth/signup', {
       method: 'POST',
-      body: JSON.stringify({ name, email, password, otp })
+      body: JSON.stringify({ name, phone, password, firebaseToken })
     });
   },
 

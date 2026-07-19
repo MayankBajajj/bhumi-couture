@@ -7,30 +7,30 @@ export const generateToken = (id) => {
   });
 };
 
-export const registerUser = async (name, email, password) => {
-  const userExists = await User.findOne({ email });
+export const registerUser = async (name, phone, password) => {
+  const userExists = await User.findOne({ phone });
   if (userExists) {
-    throw new Error('User already exists');
+    throw new Error('Phone number is already registered');
   }
-  const user = await User.create({ name, email, password });
+  const user = await User.create({ name, phone, password });
   return {
     _id: user._id,
     name: user.name,
-    email: user.email,
+    phone: user.phone,
     token: generateToken(user._id)
   };
 };
 
-export const loginUser = async (email, password) => {
-  const user = await User.findOne({ email });
+export const loginUser = async (phone, password) => {
+  const user = await User.findOne({ phone });
   if (user && (await user.comparePassword(password))) {
     return {
       _id: user._id,
       name: user.name,
-      email: user.email,
+      phone: user.phone,
       token: generateToken(user._id)
     };
   } else {
-    throw new Error('Invalid email or password');
+    throw new Error('Invalid phone number or password');
   }
 };

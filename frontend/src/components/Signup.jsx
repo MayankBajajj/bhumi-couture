@@ -1,13 +1,14 @@
-import React, { useState } from 'react';
-import { User, Mail, Lock, ArrowRight, AlertTriangle, Eye, EyeOff } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { User, Lock, ArrowRight, AlertTriangle, Eye, EyeOff, Phone } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { authService } from '../services/authService';
+import { auth } from '../config/firebase';
+import { RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth';
 
 export default function Signup({ onSwitchToLogin, onSignupSuccess }) {
   const { signup } = useAuth();
   const [formData, setFormData] = useState({
     name: '',
-    email: '',
+    phone: '',
     password: '',
     confirmPassword: ''
   });
@@ -21,17 +22,49 @@ export default function Signup({ onSwitchToLogin, onSignupSuccess }) {
   const [otpCode, setOtpCode] = useState('');
   const [sendingOtp, setSendingOtp] = useState(false);
 
+  useEffect(() => {
+    return () => {
+      if (window.recaptchaVerifier) {
+        try {
+          window.recaptchaVerifier.clear();
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    };
+  }, []);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Step 1: Send OTP code
+  const setupRecaptcha = () => {
+    try {
+      if (window.recaptchaVerifier) {
+        window.recaptchaVerifier.clear();
+      }
+      window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+        size: 'invisible',
+        callback: () => {
+          // reCAPTCHA solved
+        },
+        'expired-callback': () => {
+          setErrorMsg('reCAPTCHA expired. Please try sending OTP again.');
+        }
+      });
+    } catch (err) {
+      console.error('Error setting up reCAPTCHA verifier:', err);
+      setErrorMsg('Failed to initialize security verification. Please reload the page.');
+    }
+  };
+
+  // Step 1: Send SMS OTP
   const handleSendOtp = async (e) => {
     e.preventDefault();
-    const { name, email, password, confirmPassword } = formData;
+    const { name, phone, password, confirmPassword } = formData;
     
-    if (!name || !email || !password || !confirmPassword) {
+    if (!name || !phone || !password || !confirmPassword) {
       setErrorMsg('Please fill in all fields');
       return;
     }
@@ -46,14 +79,34 @@ export default function Signup({ onSwitchToLogin, onSignupSuccess }) {
       return;
     }
 
+    // Format phone to E.164 (India default +91)
+    let formattedPhone = phone.trim();
+    if (!formattedPhone.startsWith('+')) {
+      if (formattedPhone.length === 10) {
+        formattedPhone = `+91${formattedPhone}`;
+      } else {
+        setErrorMsg('Please enter a valid 10-digit phone number or specify country code (e.g., +91XXXXXXXXXX)');
+        return;
+      }
+    }
+
     setSendingOtp(true);
     setErrorMsg('');
 
     try {
-      await authService.sendOtp(email);
+      setupRecaptcha();
+      const confirmation = await signInWithPhoneNumber(auth, formattedPhone, window.recaptchaVerifier);
+      window.confirmationResult = confirmation;
       setShowOtpStep(true);
     } catch (err) {
-      setErrorMsg(err.message || 'Failed to send OTP verification email. Try a different address.');
+      console.error('Firebase SMS send error:', err);
+      if (err.code === 'auth/invalid-phone-number') {
+        setErrorMsg('The phone number entered is invalid.');
+      } else if (err.code === 'auth/too-many-requests') {
+        setErrorMsg('Too many requests. SMS delivery has been temporarily blocked for security reasons.');
+      } else {
+        setErrorMsg(err.message || 'Failed to send SMS OTP. Please try again.');
+      }
     } finally {
       setSendingOtp(false);
     }
@@ -71,12 +124,27 @@ export default function Signup({ onSwitchToLogin, onSignupSuccess }) {
     setErrorMsg('');
 
     try {
-      await signup(formData.name, formData.email, formData.password, otpCode);
+      const confirmationResult = window.confirmationResult;
+      if (!confirmationResult) {
+        throw new Error('No active verification session. Please request OTP again.');
+      }
+      
+      const result = await confirmationResult.confirm(otpCode);
+      const idToken = await result.user.getIdToken();
+
+      // Register user on MongoDB backend
+      await signup(formData.name, result.user.phoneNumber, formData.password, idToken);
+      
       if (onSignupSuccess) {
         onSignupSuccess();
       }
     } catch (err) {
-      setErrorMsg(err.message || 'Invalid or expired OTP code. Please try again.');
+      console.error('Verify OTP signup error:', err);
+      if (err.code === 'auth/invalid-verification-code') {
+        setErrorMsg('Incorrect verification code. Please check and try again.');
+      } else {
+        setErrorMsg(err.message || 'OTP verification failed. Please request a new code.');
+      }
     } finally {
       setSubmitting(false);
     }
@@ -85,6 +153,9 @@ export default function Signup({ onSwitchToLogin, onSignupSuccess }) {
   return (
     <div className="login-card glass-card animate-fade-in" style={{ maxWidth: '480px' }}>
       
+      {/* Container for invisible Firebase reCAPTCHA */}
+      <div id="recaptcha-container"></div>
+
       {!showOtpStep ? (
         <>
           <div className="login-header">
@@ -117,16 +188,16 @@ export default function Signup({ onSwitchToLogin, onSignupSuccess }) {
             </div>
 
             <div className="form-field">
-              <label htmlFor="signup-email">Email Address</label>
+              <label htmlFor="signup-phone">Phone Number</label>
               <div className="input-wrapper">
-                <Mail size={18} className="input-icon" />
+                <Phone size={18} className="input-icon" />
                 <input
-                  id="signup-email"
-                  type="email"
-                  name="email"
-                  value={formData.email}
+                  id="signup-phone"
+                  type="tel"
+                  name="phone"
+                  value={formData.phone}
                   onChange={handleInputChange}
-                  placeholder="name@gmail.com"
+                  placeholder="10-digit number, e.g. 9876543210"
                   required
                 />
               </div>
@@ -172,7 +243,7 @@ export default function Signup({ onSwitchToLogin, onSignupSuccess }) {
             </div>
 
             <button type="submit" className="btn btn-primary btn-auth-submit" disabled={sendingOtp}>
-              {sendingOtp ? 'Sending verification code...' : 'Sign Up'} <ArrowRight size={18} />
+              {sendingOtp ? 'Sending verification SMS...' : 'Sign Up'} <ArrowRight size={18} />
             </button>
           </form>
 
@@ -183,8 +254,8 @@ export default function Signup({ onSwitchToLogin, onSignupSuccess }) {
       ) : (
         <>
           <div className="login-header animate-fade-in">
-            <h2>Enter Verification Code</h2>
-            <p>We've sent a 6-digit verification code to <strong>{formData.email}</strong>. Enter it below to complete registration.</p>
+            <h2>Enter OTP Code</h2>
+            <p>We've sent a 6-digit verification code to <strong>{formData.phone}</strong>. Enter it below to complete registration.</p>
           </div>
 
           {errorMsg && (
@@ -213,15 +284,15 @@ export default function Signup({ onSwitchToLogin, onSignupSuccess }) {
             </div>
 
             <button type="submit" className="btn btn-primary btn-auth-submit" disabled={submitting}>
-              {submitting ? 'Verifying...' : 'Verify & Create Account'} <ArrowRight size={18} />
+              {submitting ? 'Verifying OTP...' : 'Verify & Create Account'} <ArrowRight size={18} />
             </button>
           </form>
 
           <div className="auth-footer animate-fade-in">
-            <p>Didn't receive the email? <button onClick={handleSendOtp} disabled={sendingOtp} style={{ color: 'var(--primary-pink-dark)' }}>{sendingOtp ? 'Resending...' : 'Resend Code'}</button></p>
+            <p>Didn't receive the SMS? <button onClick={handleSendOtp} disabled={sendingOtp} style={{ color: 'var(--primary-pink-dark)' }}>{sendingOtp ? 'Resending...' : 'Resend SMS'}</button></p>
             <p style={{ marginTop: '0.85rem' }}>
               <button onClick={() => { setShowOtpStep(false); setErrorMsg(''); }} style={{ color: 'var(--text-muted)' }}>
-                Edit Account Details
+                Edit Phone Number
               </button>
             </p>
           </div>

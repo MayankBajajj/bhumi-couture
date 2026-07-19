@@ -7,7 +7,7 @@ export default function MyAccountPage() {
   const { user, updateUserProfile } = useAuth();
   
   // Profile edit states
-  const [profileData, setProfileData] = useState({ name: user?.name || '', email: user?.email || '' });
+  const [profileData, setProfileData] = useState({ name: user?.name || '', phone: user?.phone || '' });
   const [editingProfile, setEditingProfile] = useState(false);
   const [profileSuccess, setProfileSuccess] = useState(false);
   const [profileError, setProfileError] = useState('');
@@ -154,11 +154,11 @@ export default function MyAccountPage() {
                     />
                   </div>
                   <div className="form-group">
-                    <label>Email Address</label>
+                    <label>Phone Number</label>
                     <input
-                      type="email"
-                      name="email"
-                      value={profileData.email}
+                      type="tel"
+                      name="phone"
+                      value={profileData.phone}
                       onChange={handleProfileChange}
                       required
                     />
@@ -172,7 +172,7 @@ export default function MyAccountPage() {
                       className="btn btn-outline btn-cancel"
                       onClick={() => {
                         setEditingProfile(false);
-                        setProfileData({ name: user?.name || '', email: user?.email || '' });
+                        setProfileData({ name: user?.name || '', phone: user?.phone || '' });
                       }}
                     >
                       Cancel
@@ -186,8 +186,8 @@ export default function MyAccountPage() {
                     <span className="info-val">{user?.name}</span>
                   </div>
                   <div className="info-row">
-                    <span className="info-label">Email Address</span>
-                    <span className="info-val">{user?.email}</span>
+                    <span className="info-label">Phone Number</span>
+                    <span className="info-val">{user?.phone}</span>
                   </div>
                 </div>
               )}

@@ -44,12 +44,12 @@ export const AuthProvider = ({ children }) => {
     initializeAuth();
   }, []);
 
-  const login = async (email, password) => {
+  const login = async (phone, password) => {
     setLoading(true);
     try {
-      const data = await authService.login(email, password);
+      const data = await authService.login(phone, password);
       localStorage.setItem('userToken', data.token);
-      setUser({ _id: data._id, name: data.name, email: data.email });
+      setUser({ _id: data._id, name: data.name, phone: data.phone });
       setLoading(false);
       return data;
     } catch (error) {
@@ -58,12 +58,26 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const signup = async (name, email, password, otp) => {
+  const loginOtp = async (phone, firebaseToken) => {
     setLoading(true);
     try {
-      const data = await authService.register(name, email, password, otp);
+      const data = await authService.loginOtp(phone, firebaseToken);
       localStorage.setItem('userToken', data.token);
-      setUser({ _id: data._id, name: data.name, email: data.email });
+      setUser({ _id: data._id, name: data.name, phone: data.phone });
+      setLoading(false);
+      return data;
+    } catch (error) {
+      setLoading(false);
+      throw error;
+    }
+  };
+
+  const signup = async (name, phone, password, firebaseToken) => {
+    setLoading(true);
+    try {
+      const data = await authService.register(name, phone, password, firebaseToken);
+      localStorage.setItem('userToken', data.token);
+      setUser({ _id: data._id, name: data.name, phone: data.phone });
       setLoading(false);
       return data;
     } catch (error) {
@@ -74,7 +88,7 @@ export const AuthProvider = ({ children }) => {
 
   const loginWithToken = (data) => {
     localStorage.setItem('userToken', data.token);
-    setUser({ _id: data._id, name: data.name, email: data.email });
+    setUser({ _id: data._id, name: data.name, phone: data.phone });
   };
 
   const logout = () => {
@@ -120,6 +134,7 @@ export const AuthProvider = ({ children }) => {
       admin,
       loading,
       login,
+      loginOtp,
       signup,
       logout,
       loginWithToken,
