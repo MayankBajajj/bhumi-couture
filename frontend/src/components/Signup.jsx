@@ -160,7 +160,7 @@ export default function Signup({ onSwitchToLogin, onSignupSuccess }) {
         <>
           <div className="login-header">
             <h2>Create Account</h2>
-            <p>Register to start shopping elegant, trend-aligned coordinates and dresses.</p>
+            <p>Register to start shopping elegant dresses and outfits.</p>
           </div>
 
           {errorMsg && (
