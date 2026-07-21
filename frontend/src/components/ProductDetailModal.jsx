@@ -112,7 +112,7 @@ export default function ProductDetailModal({ product, onClose }) {
                     <input
                       type="text"
                       name="name"
-                      placeholder="Your Name"
+                      placeholder="Enter Full Name"
                       value={formData.name}
                       onChange={handleInputChange}
                       required
@@ -120,7 +120,7 @@ export default function ProductDetailModal({ product, onClose }) {
                     <input
                       type="tel"
                       name="phone"
-                      placeholder="Phone Number"
+                      placeholder="Enter Mobile Number"
                       value={formData.phone}
                       onChange={handleInputChange}
                       required
@@ -129,7 +129,7 @@ export default function ProductDetailModal({ product, onClose }) {
                   <input
                     type="email"
                     name="email"
-                    placeholder="Your Email Address"
+                    placeholder="Enter Email Address"
                     value={formData.email}
                     onChange={handleInputChange}
                     required
@@ -139,7 +139,7 @@ export default function ProductDetailModal({ product, onClose }) {
                     rows="3"
                     value={formData.message}
                     onChange={handleInputChange}
-                    placeholder="Message/Special Requests"
+                    placeholder="Enter Your Message"
                     required
                   ></textarea>
 

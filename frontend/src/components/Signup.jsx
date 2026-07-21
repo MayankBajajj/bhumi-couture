@@ -119,7 +119,7 @@ export default function Signup({ onSwitchToLogin, onSignupSuccess }) {
                   name="name"
                   value={formData.name}
                   onChange={handleInputChange}
-                  placeholder="Your Name"
+                  placeholder="Enter Full Name"
                   required
                 />
               </div>
@@ -135,7 +135,7 @@ export default function Signup({ onSwitchToLogin, onSignupSuccess }) {
                   name="phone"
                   value={formData.phone}
                   onChange={handleInputChange}
-                  placeholder="10-digit number, e.g. 9876543210"
+                  placeholder="Enter Mobile Number"
                   required
                 />
               </div>
@@ -151,7 +151,7 @@ export default function Signup({ onSwitchToLogin, onSignupSuccess }) {
                   name="password"
                   value={formData.password}
                   onChange={handleInputChange}
-                  placeholder="Minimum 6 characters"
+                  placeholder="Enter Password"
                   required
                 />
                 <button
@@ -174,7 +174,7 @@ export default function Signup({ onSwitchToLogin, onSignupSuccess }) {
                   name="confirmPassword"
                   value={formData.confirmPassword}
                   onChange={handleInputChange}
-                  placeholder="••••••••"
+                  placeholder="Confirm Password"
                   required
                 />
               </div>
@@ -214,7 +214,7 @@ export default function Signup({ onSwitchToLogin, onSignupSuccess }) {
                   name="otp"
                   value={otpCode}
                   onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, '').substring(0, 6))}
-                  placeholder="e.g. 123456"
+                  placeholder="Enter 6-Digit OTP"
                   maxLength={6}
                   required
                 />

@@ -221,7 +221,7 @@ export default function MyAccountPage() {
                     name="currentPassword"
                     value={passData.currentPassword}
                     onChange={handlePassChange}
-                    placeholder="••••••••"
+                    placeholder="Enter Current Password"
                     required
                   />
                 </div>
@@ -232,7 +232,7 @@ export default function MyAccountPage() {
                     name="newPassword"
                     value={passData.newPassword}
                     onChange={handlePassChange}
-                    placeholder="Minimum 6 characters"
+                    placeholder="Enter New Password"
                     required
                   />
                 </div>
@@ -243,7 +243,7 @@ export default function MyAccountPage() {
                     name="confirmPassword"
                     value={passData.confirmPassword}
                     onChange={handlePassChange}
-                    placeholder="••••••••"
+                    placeholder="Confirm New Password"
                     required
                   />
                 </div>

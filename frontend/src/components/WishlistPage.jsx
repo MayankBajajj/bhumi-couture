@@ -102,14 +102,16 @@ export default function WishlistPage({ onContinueShopping, onSelectProduct }) {
         
         .wishlist-cards-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-          gap: 2rem;
+          grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+          gap: 1.5rem;
+          width: 100%;
         }
         
         .wishlist-item-wrapper {
           display: flex;
           flex-direction: column;
           gap: 0.75rem;
+          width: 100%;
         }
         
         .wishlist-remove-btn {
@@ -127,21 +129,28 @@ export default function WishlistPage({ onContinueShopping, onSelectProduct }) {
           border-color: #dc3545;
           color: #c82333;
         }
+
+        @media (max-width: 992px) {
+          .wishlist-cards-grid {
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1.25rem;
+          }
+        }
         @media (max-width: 576px) {
           .wishlist-view {
             padding-top: 1rem !important;
             padding-bottom: 1.5rem !important;
           }
           .wishlist-banner {
-            padding: 1rem 0.75rem !important;
+            padding: 1.25rem 1rem !important;
             margin-bottom: 1rem !important;
           }
           .wishlist-banner h1 {
             font-size: 1.5rem !important;
-            margin-bottom: 0 !important;
+            margin-bottom: 0.25rem !important;
           }
           .wishlist-banner p {
-            display: none !important;
+            font-size: 0.85rem !important;
           }
           .wishlist-cards-grid {
             grid-template-columns: repeat(2, 1fr) !important;
@@ -150,6 +159,10 @@ export default function WishlistPage({ onContinueShopping, onSelectProduct }) {
           .wishlist-count {
             font-size: 0.8rem !important;
             margin-bottom: 0.85rem !important;
+          }
+          .wishlist-remove-btn {
+            padding: 0.5rem !important;
+            font-size: 0.75rem !important;
           }
         }
       `}</style>

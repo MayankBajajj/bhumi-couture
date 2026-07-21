@@ -179,7 +179,7 @@ export default function Login({ onSwitchToSignup, onLoginSuccess }) {
                     type="tel"
                     value={phoneForOtp}
                     onChange={(e) => setPhoneForOtp(e.target.value)}
-                    placeholder="e.g. 9876543210"
+                    placeholder="Enter Mobile Number"
                     required
                   />
                 </div>
@@ -221,7 +221,7 @@ export default function Login({ onSwitchToSignup, onLoginSuccess }) {
                     maxLength={6}
                     value={otpCode}
                     onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, '').substring(0, 6))}
-                    placeholder="e.g. 123456"
+                    placeholder="Enter 6-Digit OTP"
                     required
                   />
                 </div>
@@ -236,7 +236,7 @@ export default function Login({ onSwitchToSignup, onLoginSuccess }) {
                     type={showNewPassword ? 'text' : 'password'}
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    placeholder="Minimum 6 characters"
+                    placeholder="Enter New Password"
                     required
                   />
                   <button
@@ -295,7 +295,7 @@ export default function Login({ onSwitchToSignup, onLoginSuccess }) {
                 name="phone"
                 value={formData.phone}
                 onChange={handleInputChange}
-                placeholder="10-digit number, e.g. 9876543210"
+                placeholder="Enter Mobile Number"
                 required
               />
             </div>
@@ -311,7 +311,7 @@ export default function Login({ onSwitchToSignup, onLoginSuccess }) {
                 name="password"
                 value={formData.password}
                 onChange={handleInputChange}
-                placeholder="••••••••"
+                placeholder="Enter Password"
                 required
               />
               <button
@@ -357,7 +357,7 @@ export default function Login({ onSwitchToSignup, onLoginSuccess }) {
                     name="phone"
                     value={formData.phone}
                     onChange={handleInputChange}
-                    placeholder="10-digit number, e.g. 9876543210"
+                    placeholder="Enter Mobile Number"
                     required
                   />
                 </div>
@@ -383,7 +383,7 @@ export default function Login({ onSwitchToSignup, onLoginSuccess }) {
                     maxLength={6}
                     value={otpCode}
                     onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, '').substring(0, 6))}
-                    placeholder="e.g. 123456"
+                    placeholder="Enter 6-Digit OTP"
                     required
                   />
                 </div>

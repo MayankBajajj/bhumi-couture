@@ -120,7 +120,7 @@ export default function ContactForm() {
                   name="name"
                   value={formData.name}
                   onChange={handleInputChange}
-                  placeholder="Enter your name"
+                  placeholder="Enter Full Name"
                   required
                 />
               </div>
@@ -134,7 +134,7 @@ export default function ContactForm() {
                     name="email"
                     value={formData.email}
                     onChange={handleInputChange}
-                    placeholder="name@gmail.com"
+                    placeholder="Enter Email Address"
                     required
                   />
                 </div>
@@ -146,7 +146,7 @@ export default function ContactForm() {
                     name="phone"
                     value={formData.phone}
                     onChange={handleInputChange}
-                    placeholder="10-digit number"
+                    placeholder="Enter Mobile Number"
                     required
                   />
                 </div>
@@ -160,7 +160,7 @@ export default function ContactForm() {
                   rows="4"
                   value={formData.message}
                   onChange={handleInputChange}
-                  placeholder="Enquire about custom sizes, fabrics, styles..."
+                  placeholder="Enter Your Message"
                   required
                 ></textarea>
               </div>
