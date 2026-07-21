@@ -1,9 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ShoppingBag, Trash2, Plus, Minus, ArrowRight, Check, AlertCircle, ArrowLeft } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { orderService } from '../services/orderService';
 import { request } from '../services/api';
+
+const getCleanPhone = (phoneStr) => {
+  if (!phoneStr) return '';
+  let clean = phoneStr.replace(/\D/g, '');
+  if (clean.length > 10 && clean.startsWith('91')) {
+    clean = clean.substring(2);
+  }
+  return clean.slice(0, 10);
+};
 
 export default function CartPage({ onContinueShopping, onSelectProductBySlug }) {
   const { user } = useAuth();
@@ -20,13 +29,23 @@ export default function CartPage({ onContinueShopping, onSelectProductBySlug }) 
   // Address Form State
   const [addressForm, setAddressForm] = useState({
     name: user ? user.name : '',
-    phone: '',
+    phone: user ? getCleanPhone(user.phone) : '',
     street: '',
     city: '',
     state: '',
     pincode: '',
     paymentMethod: 'COD'
   });
+
+  useEffect(() => {
+    if (user) {
+      setAddressForm(prev => ({
+        ...prev,
+        name: prev.name || user.name || '',
+        phone: prev.phone || getCleanPhone(user.phone)
+      }));
+    }
+  }, [user]);
 
   const cartTotal = getCartTotal();
 
@@ -88,11 +107,13 @@ export default function CartPage({ onContinueShopping, onSelectProductBySlug }) 
     e.preventDefault();
     if (!addressForm.name || !addressForm.phone || !addressForm.street || !addressForm.city || !addressForm.state || !addressForm.pincode) {
       setOrderError('Please fill in all shipping details.');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
 
-    if (addressForm.phone.length !== 10) {
+    if (addressForm.phone.replace(/\D/g, '').length !== 10) {
       setOrderError('Please enter a valid 10-digit phone number.');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
 
@@ -427,7 +448,7 @@ export default function CartPage({ onContinueShopping, onSelectProductBySlug }) 
                       name="name"
                       value={addressForm.name}
                       onChange={handleInputChange}
-                      placeholder="e.g. Bhawna Bajaj"
+                      placeholder="Enter Full Name"
                       required
                     />
                   </div>
@@ -440,7 +461,7 @@ export default function CartPage({ onContinueShopping, onSelectProductBySlug }) 
                       name="phone"
                       value={addressForm.phone}
                       onChange={handleInputChange}
-                      placeholder="10-digit mobile number"
+                      placeholder="Enter Mobile Number"
                       required
                     />
                   </div>
@@ -454,7 +475,7 @@ export default function CartPage({ onContinueShopping, onSelectProductBySlug }) 
                     name="street"
                     value={addressForm.street}
                     onChange={handleInputChange}
-                    placeholder="Apartment, building, street address"
+                    placeholder="Enter Street Address & House/Flat No."
                     required
                   />
                 </div>
@@ -468,7 +489,7 @@ export default function CartPage({ onContinueShopping, onSelectProductBySlug }) 
                       name="city"
                       value={addressForm.city}
                       onChange={handleInputChange}
-                      placeholder="Gurgaon"
+                      placeholder="Enter City"
                       required
                     />
                   </div>
@@ -481,7 +502,7 @@ export default function CartPage({ onContinueShopping, onSelectProductBySlug }) 
                       name="state"
                       value={addressForm.state}
                       onChange={handleInputChange}
-                      placeholder="Haryana"
+                      placeholder="Enter State"
                       required
                     />
                   </div>
@@ -494,7 +515,7 @@ export default function CartPage({ onContinueShopping, onSelectProductBySlug }) 
                       name="pincode"
                       value={addressForm.pincode}
                       onChange={handleInputChange}
-                      placeholder="122018"
+                      placeholder="Enter Pin Code"
                       required
                     />
                   </div>
@@ -570,6 +591,13 @@ export default function CartPage({ onContinueShopping, onSelectProductBySlug }) 
                     </span>
                   </div>
                 </div>
+
+                {orderError && (
+                  <div className="order-error-alert" style={{ marginBottom: '1rem' }}>
+                    <AlertCircle size={18} />
+                    <span>{orderError}</span>
+                  </div>
+                )}
 
                 <button type="submit" className="btn btn-primary btn-checkout" disabled={checkingOut}>
                   {checkingOut ? 'Submitting Order...' : (addressForm.paymentMethod === 'COD' ? 'Place Order (COD)' : 'Place Order')} <ArrowRight size={18} />
