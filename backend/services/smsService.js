@@ -44,18 +44,22 @@ export const sendSmsOtp = async (phone, otp) => {
       console.log('[SMS GATEWAY RESPONSE]:', data);
       return { success: true, data };
     } else {
-      // Standard HTTP POST payload to SMS Gateway API
+      const bodyPayload = {
+        route: 'otp',
+        variables_values: otp,
+        numbers: cleanPhone
+      };
+      if (senderId) {
+        bodyPayload.sender_id = senderId;
+      }
+
       const response = await fetch('https://www.fast2sms.com/dev/bulkV2', {
         method: 'POST',
         headers: {
           'authorization': apiKey,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          route: 'otp',
-          variables_values: otp,
-          numbers: cleanPhone
-        })
+        body: JSON.stringify(bodyPayload)
       });
 
       const data = await response.json();
