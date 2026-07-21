@@ -17,7 +17,7 @@ export const sendOtpController = async (req, res, next) => {
   try {
     const { phone } = req.body;
     if (!phone) {
-      return res.status(400).json({ message: 'Please provide a phone number' });
+      return res.status(400).json({ message: 'Please enter a valid 10-digit phone number' });
     }
 
     const formattedPhone = normalizePhone(phone);
@@ -36,12 +36,16 @@ export const sendOtpController = async (req, res, next) => {
     );
 
     // Send SMS via Gateway
-    await sendSmsOtp(formattedPhone, otp);
+    try {
+      await sendSmsOtp(formattedPhone, otp);
+    } catch (smsErr) {
+      console.error('[SMS GATEWAY ERROR]:', smsErr.message);
+      return res.status(400).json({ message: 'Please enter a valid 10-digit phone number' });
+    }
 
     res.json({ message: 'Verification OTP sent to your phone number' });
   } catch (error) {
-    res.status(400);
-    next(error);
+    res.status(400).json({ message: 'Please enter a valid 10-digit phone number' });
   }
 };
 

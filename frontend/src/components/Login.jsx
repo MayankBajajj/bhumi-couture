@@ -54,7 +54,7 @@ export default function Login({ onSwitchToSignup, onLoginSuccess }) {
       setShowOtpStep(true);
     } catch (err) {
       console.error(err);
-      setErrorMsg(err.message || 'Failed to send SMS verification code.');
+      setErrorMsg(err.message || 'Please enter a valid 10-digit phone number.');
     } finally {
       setSendingOtp(false);
     }

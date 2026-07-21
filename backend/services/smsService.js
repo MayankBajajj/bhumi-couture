@@ -45,12 +45,13 @@ export const sendSmsOtp = async (phone, otp) => {
     console.log('[BLACKSMS GATEWAY RESPONSE]:', data);
 
     if (data.status === 0) {
-      throw new Error(data.message || 'SMS delivery failed');
+      console.error('[BLACKSMS API REJECTED]:', data);
+      throw new Error('Please enter a valid 10-digit phone number');
     }
 
     return { success: true, data };
   } catch (err) {
     console.error('Error sending SMS via BlackSMS:', err.message);
-    throw new Error('Failed to send SMS verification code: ' + err.message);
+    throw new Error('Please enter a valid 10-digit phone number');
   }
 };

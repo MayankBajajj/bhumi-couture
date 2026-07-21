@@ -60,7 +60,7 @@ export default function Signup({ onSwitchToLogin, onSignupSuccess }) {
       setShowOtpStep(true);
     } catch (err) {
       console.error('SMS send error:', err);
-      setErrorMsg(err.message || 'Failed to send SMS verification code. Please try again.');
+      setErrorMsg(err.message || 'Please enter a valid 10-digit phone number.');
     } finally {
       setSendingOtp(false);
     }
