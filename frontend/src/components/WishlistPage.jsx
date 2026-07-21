@@ -106,12 +106,17 @@ export default function WishlistPage({ onContinueShopping, onSelectProduct }) {
           gap: 1.5rem;
           width: 100%;
         }
+        .wishlist-cards-grid > * {
+          min-width: 0;
+        }
         
         .wishlist-item-wrapper {
           display: flex;
           flex-direction: column;
           gap: 0.75rem;
           width: 100%;
+          min-width: 0;
+          overflow: hidden;
         }
         
         .wishlist-remove-btn {
@@ -139,7 +144,7 @@ export default function WishlistPage({ onContinueShopping, onSelectProduct }) {
         @media (max-width: 576px) {
           .wishlist-view {
             padding-top: 1rem !important;
-            padding-bottom: 1.5rem !important;
+            padding-bottom: 2rem !important;
           }
           .wishlist-banner {
             padding: 1.25rem 1rem !important;
@@ -152,17 +157,24 @@ export default function WishlistPage({ onContinueShopping, onSelectProduct }) {
           .wishlist-banner p {
             font-size: 0.85rem !important;
           }
+          .wishlist-grid-wrapper {
+            width: 100%;
+            overflow: hidden;
+          }
           .wishlist-cards-grid {
             grid-template-columns: repeat(2, 1fr) !important;
             gap: 0.75rem !important;
+            width: 100% !important;
           }
           .wishlist-count {
             font-size: 0.8rem !important;
             margin-bottom: 0.85rem !important;
           }
           .wishlist-remove-btn {
-            padding: 0.5rem !important;
-            font-size: 0.75rem !important;
+            padding: 0.45rem 0.2rem !important;
+            font-size: 0.72rem !important;
+            gap: 0.2rem !important;
+            white-space: nowrap;
           }
         }
       `}</style>

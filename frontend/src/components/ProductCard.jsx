@@ -67,6 +67,9 @@ export default function ProductCard({ product, onSelectProduct }) {
           border: 1px solid var(--border-light);
           cursor: pointer;
           transition: all var(--transition-normal);
+          width: 100%;
+          min-width: 0;
+          max-width: 100%;
         }
         .product-card:hover {
           transform: translateY(-6px);

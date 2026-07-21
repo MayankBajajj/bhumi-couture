@@ -530,6 +530,9 @@ Error generating stack: `+e.message+`
           border: 1px solid var(--border-light);
           cursor: pointer;
           transition: all var(--transition-normal);
+          width: 100%;
+          min-width: 0;
+          max-width: 100%;
         }
         .product-card:hover {
           transform: translateY(-6px);
@@ -2489,12 +2492,17 @@ Error generating stack: `+e.message+`
           gap: 1.5rem;
           width: 100%;
         }
+        .wishlist-cards-grid > * {
+          min-width: 0;
+        }
         
         .wishlist-item-wrapper {
           display: flex;
           flex-direction: column;
           gap: 0.75rem;
           width: 100%;
+          min-width: 0;
+          overflow: hidden;
         }
         
         .wishlist-remove-btn {
@@ -2522,7 +2530,7 @@ Error generating stack: `+e.message+`
         @media (max-width: 576px) {
           .wishlist-view {
             padding-top: 1rem !important;
-            padding-bottom: 1.5rem !important;
+            padding-bottom: 2rem !important;
           }
           .wishlist-banner {
             padding: 1.25rem 1rem !important;
@@ -2535,17 +2543,24 @@ Error generating stack: `+e.message+`
           .wishlist-banner p {
             font-size: 0.85rem !important;
           }
+          .wishlist-grid-wrapper {
+            width: 100%;
+            overflow: hidden;
+          }
           .wishlist-cards-grid {
             grid-template-columns: repeat(2, 1fr) !important;
             gap: 0.75rem !important;
+            width: 100% !important;
           }
           .wishlist-count {
             font-size: 0.8rem !important;
             margin-bottom: 0.85rem !important;
           }
           .wishlist-remove-btn {
-            padding: 0.5rem !important;
-            font-size: 0.75rem !important;
+            padding: 0.45rem 0.2rem !important;
+            font-size: 0.72rem !important;
+            gap: 0.2rem !important;
+            white-space: nowrap;
           }
         }
       `})]})}function at(){let{user:e,updateUserProfile:t}=L(),[n,r]=(0,_.useState)({name:e?.name||``,phone:e?.phone||``}),[i,a]=(0,_.useState)(!1),[o,s]=(0,_.useState)(!1),[c,l]=(0,_.useState)(``),[u,d]=(0,_.useState)({currentPassword:``,newPassword:``,confirmPassword:``}),[f,p]=(0,_.useState)(!1),[m,h]=(0,_.useState)(``),[g,v]=(0,_.useState)(!1),[y,b]=(0,_.useState)([]),[x,S]=(0,_.useState)(!0);(0,_.useEffect)(()=>{e&&(async()=>{S(!0);try{b(await tt.getUserOrders()||[])}catch(e){console.error(`Error fetching user orders history:`,e)}finally{S(!1)}})()},[e]);let C=e=>{let{name:t,value:n}=e.target;r(e=>({...e,[t]:n}))},w=e=>{let{name:t,value:n}=e.target;d(e=>({...e,[t]:n}))};return(0,I.jsxs)(`main`,{className:`profile-view section animate-fade-in`,children:[(0,I.jsxs)(`div`,{className:`container`,children:[(0,I.jsxs)(`div`,{className:`profile-banner glass-card`,children:[(0,I.jsx)(`h1`,{children:`My Account`}),(0,I.jsx)(`p`,{children:`Manage your profile details, password, and track your boutique orders.`})]}),(0,I.jsxs)(`div`,{className:`profile-grid`,children:[(0,I.jsxs)(`div`,{className:`profile-settings-col`,children:[(0,I.jsxs)(`div`,{className:`profile-details-card glass-card`,children:[(0,I.jsxs)(`div`,{className:`card-header`,children:[(0,I.jsx)(`h3`,{children:`Profile Information`}),!i&&(0,I.jsxs)(`button`,{className:`edit-btn`,onClick:()=>a(!0),children:[(0,I.jsx)(fe,{size:16}),` Edit Profile`]})]}),o&&(0,I.jsxs)(`div`,{className:`alert alert-success animate-fade-in`,children:[(0,I.jsx)(ie,{size:16}),` Profile updated successfully!`]}),c&&(0,I.jsxs)(`div`,{className:`alert alert-danger animate-fade-in`,children:[(0,I.jsx)(Te,{size:16}),` `,c]}),i?(0,I.jsxs)(`form`,{onSubmit:async e=>{e.preventDefault(),l(``),s(!1);try{await t(n),s(!0),a(!1)}catch(e){l(e.message||`Failed to update profile`)}},className:`profile-form`,children:[(0,I.jsxs)(`div`,{className:`form-group`,children:[(0,I.jsx)(`label`,{children:`Full Name`}),(0,I.jsx)(`input`,{type:`text`,name:`name`,value:n.name,onChange:C,required:!0})]}),(0,I.jsxs)(`div`,{className:`form-group`,children:[(0,I.jsx)(`label`,{children:`Phone Number`}),(0,I.jsx)(`input`,{type:`tel`,name:`phone`,value:n.phone,onChange:C,required:!0})]}),(0,I.jsxs)(`div`,{className:`form-btns-row`,children:[(0,I.jsx)(`button`,{type:`submit`,className:`btn btn-primary btn-save`,children:`Save Changes`}),(0,I.jsx)(`button`,{type:`button`,className:`btn btn-outline btn-cancel`,onClick:()=>{a(!1),r({name:e?.name||``,phone:e?.phone||``})},children:`Cancel`})]})]}):(0,I.jsxs)(`div`,{className:`profile-info-display`,children:[(0,I.jsxs)(`div`,{className:`info-row`,children:[(0,I.jsx)(`span`,{className:`info-label`,children:`Full Name`}),(0,I.jsx)(`span`,{className:`info-val`,children:e?.name})]}),(0,I.jsxs)(`div`,{className:`info-row`,children:[(0,I.jsx)(`span`,{className:`info-label`,children:`Phone Number`}),(0,I.jsx)(`span`,{className:`info-val`,children:e?.phone})]})]})]}),(0,I.jsxs)(`div`,{className:`profile-details-card glass-card`,style:{marginTop:`2rem`},children:[(0,I.jsx)(`div`,{className:`card-header`,children:(0,I.jsxs)(`h3`,{className:`card-title-icon`,children:[(0,I.jsx)(A,{size:20,className:`icon-pink`}),` Change Password`]})}),f&&(0,I.jsxs)(`div`,{className:`alert alert-success animate-fade-in`,children:[(0,I.jsx)(ie,{size:16}),` Password updated successfully!`]}),m&&(0,I.jsxs)(`div`,{className:`alert alert-danger animate-fade-in`,children:[(0,I.jsx)(Te,{size:16}),` `,m]}),(0,I.jsxs)(`form`,{onSubmit:async e=>{if(e.preventDefault(),h(``),p(!1),u.newPassword!==u.confirmPassword){h(`New passwords do not match`);return}if(u.newPassword.length<6){h(`New password must be at least 6 characters long`);return}v(!0);try{let e=await fetch(`http://localhost:5000/api/auth/change-password`,{method:`PUT`,headers:{"Content-Type":`application/json`,Authorization:`Bearer ${localStorage.getItem(`userToken`)}`},body:JSON.stringify({currentPassword:u.currentPassword,newPassword:u.newPassword})}),t=await e.json();e.ok?(p(!0),d({currentPassword:``,newPassword:``,confirmPassword:``})):h(t.message||`Failed to change password`)}catch{h(`Connection error changing password`)}finally{v(!1)}},className:`profile-form`,children:[(0,I.jsxs)(`div`,{className:`form-group`,children:[(0,I.jsx)(`label`,{children:`Current Password`}),(0,I.jsx)(`input`,{type:`password`,name:`currentPassword`,value:u.currentPassword,onChange:w,placeholder:`Enter Current Password`,required:!0})]}),(0,I.jsxs)(`div`,{className:`form-group`,children:[(0,I.jsx)(`label`,{children:`New Password`}),(0,I.jsx)(`input`,{type:`password`,name:`newPassword`,value:u.newPassword,onChange:w,placeholder:`Enter New Password`,required:!0})]}),(0,I.jsxs)(`div`,{className:`form-group`,children:[(0,I.jsx)(`label`,{children:`Confirm New Password`}),(0,I.jsx)(`input`,{type:`password`,name:`confirmPassword`,value:u.confirmPassword,onChange:w,placeholder:`Confirm New Password`,required:!0})]}),(0,I.jsx)(`button`,{type:`submit`,className:`btn btn-primary btn-save`,disabled:g,children:g?`Updating...`:`Update Password`})]})]})]}),(0,I.jsx)(`div`,{className:`profile-orders-col`,children:(0,I.jsxs)(`div`,{className:`profile-details-card glass-card h-full`,children:[(0,I.jsx)(`div`,{className:`card-header`,children:(0,I.jsxs)(`h3`,{className:`card-title-icon`,children:[(0,I.jsx)(le,{size:20,className:`icon-pink`}),` Order History`]})}),x?(0,I.jsx)(`div`,{className:`orders-loader`,children:(0,I.jsx)(`div`,{className:`pink-loader`})}):y.length===0?(0,I.jsxs)(`div`,{className:`orders-placeholder`,children:[(0,I.jsx)(`div`,{className:`placeholder-circle`,children:(0,I.jsx)(le,{size:32})}),(0,I.jsx)(`h4`,{children:`No Orders Placed Yet`}),(0,I.jsx)(`p`,{children:`Your orders record is empty. Once you proceed to checkout and place orders, details will appear here.`})]}):(0,I.jsx)(`div`,{className:`customer-orders-list`,children:y.map(e=>(0,I.jsxs)(`div`,{className:`customer-order-card glass-card animate-fade-in`,children:[(0,I.jsxs)(`div`,{className:`order-card-header`,children:[(0,I.jsxs)(`div`,{children:[(0,I.jsx)(`span`,{className:`order-lbl`,children:`Order ID`}),(0,I.jsxs)(`span`,{className:`order-val-id`,children:[`#`,e._id.substring(e._id.length-8)]})]}),(0,I.jsxs)(`div`,{children:[(0,I.jsx)(`span`,{className:`order-lbl`,children:`Placed On`}),(0,I.jsx)(`span`,{className:`order-val-date`,children:new Date(e.createdAt).toLocaleDateString(`en-IN`,{day:`numeric`,month:`short`,year:`numeric`})})]}),(0,I.jsxs)(`div`,{children:[(0,I.jsx)(`span`,{className:`order-lbl`,children:`Status`}),(0,I.jsx)(`span`,{className:`order-status-badge badge-${e.status.toLowerCase()}`,children:e.status})]})]}),(0,I.jsx)(`div`,{className:`order-card-items`,children:e.items.map((e,t)=>(0,I.jsxs)(`div`,{className:`order-card-item-row`,children:[(0,I.jsx)(`img`,{src:e.productId?.image||`https://images.unsplash.com/photo-1595777457583-95e059d581b8?q=80&w=150`,alt:`outfit`,className:`order-item-img`}),(0,I.jsxs)(`div`,{className:`order-item-details`,children:[(0,I.jsx)(`h5`,{children:e.productId?.name||`Unknown Outfit`}),(0,I.jsxs)(`p`,{children:[`Size: `,(0,I.jsx)(`strong`,{children:e.size}),` `,e.color&&`| Color: ${e.color}`]}),(0,I.jsxs)(`span`,{className:`order-item-qty-price`,children:[new Intl.NumberFormat(`en-IN`,{style:`currency`,currency:`INR`,maximumFractionDigits:0}).format(e.price),` x `,e.quantity]})]})]},t))}),e.trackingNumber&&(0,I.jsxs)(`div`,{className:`order-tracking-box`,children:[(0,I.jsxs)(`div`,{className:`tracking-header`,children:[(0,I.jsxs)(`span`,{children:[`Courier Carrier: `,(0,I.jsx)(`strong`,{className:`pink-text`,children:e.courierName||`Shiprocket`})]}),(0,I.jsxs)(`span`,{children:[`AWB Tracking: `,(0,I.jsx)(`strong`,{children:e.trackingNumber})]})]}),e.trackingUrl&&(0,I.jsx)(`a`,{href:e.trackingUrl,target:`_blank`,rel:`noopener noreferrer`,className:`btn-track-package`,children:`Track Package`})]}),e.timeline&&e.timeline.length>0&&(0,I.jsxs)(`div`,{className:`order-timeline-wrapper`,children:[(0,I.jsx)(`span`,{className:`timeline-title`,children:`Delivery Status Updates`}),(0,I.jsx)(`div`,{className:`timeline-items`,children:e.timeline.map((t,n)=>(0,I.jsxs)(`div`,{className:`timeline-event-item`,children:[(0,I.jsxs)(`div`,{className:`event-indicator`,children:[(0,I.jsx)(`div`,{className:`event-dot`}),n<e.timeline.length-1&&(0,I.jsx)(`div`,{className:`event-line`})]}),(0,I.jsxs)(`div`,{className:`event-details`,children:[(0,I.jsxs)(`div`,{className:`event-header`,children:[(0,I.jsx)(`span`,{className:`event-status`,children:t.status}),(0,I.jsx)(`span`,{className:`event-date`,children:new Date(t.createdAt).toLocaleDateString(`en-IN`,{day:`numeric`,month:`short`,hour:`2-digit`,minute:`2-digit`})})]}),t.note&&(0,I.jsx)(`span`,{className:`event-note`,children:t.note})]})]},n))})]}),(0,I.jsxs)(`div`,{className:`order-card-footer`,children:[(0,I.jsx)(`div`,{className:`footer-meta`,children:(0,I.jsxs)(`span`,{children:[`Payment: `,(0,I.jsxs)(`strong`,{children:[e.paymentMethod,` (`,e.paymentStatus,`)`]})]})}),(0,I.jsxs)(`div`,{className:`footer-total`,children:[(0,I.jsx)(`span`,{children:`Total Amount:`}),(0,I.jsx)(`strong`,{children:new Intl.NumberFormat(`en-IN`,{style:`currency`,currency:`INR`,maximumFractionDigits:0}).format(e.totalAmount)})]})]})]},e._id))})]})})]})]}),(0,I.jsx)(`style`,{children:`
