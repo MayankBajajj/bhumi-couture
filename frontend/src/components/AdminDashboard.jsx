@@ -431,11 +431,12 @@ export default function AdminDashboard() {
     }
   };
 
-  const filteredOrders = orders.filter(order => {
-    const customerName = order.userId ? order.userId.name.toLowerCase() : 'guest';
-    const customerEmail = order.userId ? order.userId.email.toLowerCase() : '';
-    const orderId = order._id.toLowerCase();
-    const query = ordersSearch.toLowerCase();
+  const filteredOrders = (orders || []).filter(order => {
+    if (!order) return false;
+    const customerName = order.userId && order.userId.name ? order.userId.name.toLowerCase() : 'guest';
+    const customerEmail = order.userId && order.userId.email ? order.userId.email.toLowerCase() : '';
+    const orderId = order._id ? order._id.toLowerCase() : '';
+    const query = (ordersSearch || '').toLowerCase();
     
     const matchesSearch = 
       orderId.includes(query) ||
@@ -1052,13 +1053,14 @@ export default function AdminDashboard() {
                     </thead>
                     <tbody>
                       {filteredOrders.map(order => {
-                        const customerName = order.userId ? order.userId.name : 'Guest User';
-                        const customerEmail = order.userId ? order.userId.email : 'N/A';
+                        if (!order) return null;
+                        const customerName = order.userId && order.userId.name ? order.userId.name : 'Guest User';
+                        const customerEmail = order.userId && order.userId.email ? order.userId.email : 'N/A';
                         
                         return (
-                          <tr key={order._id}>
+                          <tr key={order._id || Math.random()}>
                             <td>
-                              <code className="order-id-code" title={order._id}>{order._id.substring(order._id.length - 8)}</code>
+                              <code className="order-id-code" title={order._id}>{order._id ? order._id.substring(order._id.length - 8) : 'N/A'}</code>
                             </td>
                             <td>
                               <div className="customer-info-col">
@@ -1068,7 +1070,7 @@ export default function AdminDashboard() {
                             </td>
                             <td>
                               <div className="order-items-col" style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                                {order.items.map((item, idx) => (
+                                {(order.items || []).map((item, idx) => (
                                   <div key={idx} className="order-item-list-row" style={{ fontSize: '0.85rem', display: 'flex', gap: '0.5rem' }}>
                                     <span style={{ color: 'var(--text-muted)' }}>{item.productId ? item.productId.name : 'Unknown Product'} ({item.size})</span>
                                     <strong style={{ color: 'var(--dark-charcoal)' }}>x{item.quantity}</strong>
@@ -1077,24 +1079,24 @@ export default function AdminDashboard() {
                               </div>
                             </td>
                             <td className="font-bold pink-text" style={{ fontWeight: '700', color: 'var(--primary-pink-dark)' }}>
-                              {new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(order.totalAmount)}
+                              {new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(order.totalAmount || 0)}
                             </td>
                             <td>
                               <div className="payment-info-col" style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-                                <span className="payment-method-badge" style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--dark-charcoal)' }}>{order.paymentMethod}</span>
-                                <span className={`payment-status-badge ${order.paymentStatus === 'Paid' ? 'paid' : 'unpaid'}`} style={{ fontSize: '0.7rem', fontWeight: '600', color: order.paymentStatus === 'Paid' ? '#28a745' : '#dc3545' }}>
-                                  {order.paymentStatus}
+                                <span className="payment-method-badge" style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--dark-charcoal)' }}>{order.paymentMethod || 'COD'}</span>
+                                <span className={`payment-status-badge ${(order.paymentStatus || 'Unpaid').toLowerCase() === 'paid' ? 'paid' : 'unpaid'}`} style={{ fontSize: '0.7rem', fontWeight: '600', color: (order.paymentStatus || 'Unpaid').toLowerCase() === 'paid' ? '#28a745' : '#dc3545' }}>
+                                  {order.paymentStatus || 'Unpaid'}
                                 </span>
                               </div>
                             </td>
                             <td>
                               <div className="address-text-col" title={order.shippingAddress} style={{ fontSize: '0.8rem', color: 'var(--text-muted)', maxWidth: '160px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                {order.shippingAddress}
+                                {order.shippingAddress || 'N/A'}
                               </div>
                             </td>
                             <td>
-                              <span className={`order-status-badge badge-${order.status.toLowerCase()}`}>
-                                {order.status}
+                              <span className={`order-status-badge badge-${(order.status || 'Pending').toLowerCase()}`}>
+                                {order.status || 'Pending'}
                               </span>
                             </td>
                             <td>
