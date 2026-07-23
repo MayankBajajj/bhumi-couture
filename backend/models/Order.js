@@ -45,12 +45,12 @@ const orderSchema = new mongoose.Schema({
   },
   paymentMethod: {
     type: String,
-    enum: ['COD', 'Online'],
+    enum: ['COD', 'Online', 'Partial COD'],
     default: 'COD'
   },
   paymentStatus: {
     type: String,
-    enum: ['Pending', 'Paid', 'Failed', 'Refunded', 'Partially Refunded'],
+    enum: ['Pending', 'Paid', 'Failed', 'Refunded', 'Partially Refunded', 'Partially Paid'],
     default: 'Pending'
   },
   razorpayOrderId: {

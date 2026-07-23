@@ -34,7 +34,7 @@ export default function CartPage({ onContinueShopping, onSelectProductBySlug }) 
     city: '',
     state: '',
     pincode: '',
-    paymentMethod: 'COD'
+    paymentMethod: 'Partial COD'
   });
 
   useEffect(() => {
@@ -149,13 +149,16 @@ export default function CartPage({ onContinueShopping, onSelectProductBySlug }) 
           throw new Error('Failed to load Razorpay SDK. Please check your internet connection.');
         }
 
+        const isPartialCod = addressForm.paymentMethod === 'Partial COD';
+
         // 1. Create Razorpay order on backend
         const rzpOrder = await request('/payments/razorpay/order', {
           method: 'POST',
           body: JSON.stringify({
             items: orderData.items,
             totalAmount: orderData.totalAmount,
-            shippingAddress: orderData.shippingAddress
+            shippingAddress: orderData.shippingAddress,
+            isPartialCod
           })
         }, false);
 
@@ -525,17 +528,17 @@ export default function CartPage({ onContinueShopping, onSelectProductBySlug }) 
 
                 <h3>Payment Options</h3>
                 <div className="payment-options-list">
-                  <label className={`payment-option-label ${addressForm.paymentMethod === 'COD' ? 'active-payment' : ''}`}>
+                  <label className={`payment-option-label ${addressForm.paymentMethod === 'Partial COD' ? 'active-payment' : ''}`}>
                     <input
                       type="radio"
                       name="paymentMethod"
-                      value="COD"
-                      checked={addressForm.paymentMethod === 'COD'}
+                      value="Partial COD"
+                      checked={addressForm.paymentMethod === 'Partial COD'}
                       onChange={handleInputChange}
                     />
                     <div className="payment-label-text">
-                      <strong>Cash on Delivery (COD)</strong>
-                      <span>Pay with cash when your outfit is delivered.</span>
+                      <strong>Partial Cash on Delivery (COD)</strong>
+                      <span>Pay ₹500 online now, pay remaining amount on delivery.</span>
                     </div>
                   </label>
 
@@ -548,11 +551,19 @@ export default function CartPage({ onContinueShopping, onSelectProductBySlug }) 
                       onChange={handleInputChange}
                     />
                     <div className="payment-label-text">
-                      <strong>Online UPI / Card / NetBanking</strong>
-                      <span>Pay securely online via Razorpay.</span>
+                      <strong>Pay Full Online</strong>
+                      <span>Pay the complete amount securely online via Razorpay (UPI, Card, etc.).</span>
                     </div>
                   </label>
                 </div>
+
+                {addressForm.paymentMethod === 'Partial COD' && (
+                  <div style={{ marginTop: '0.75rem', padding: '0.75rem 1rem', background: 'rgba(240, 84, 138, 0.08)', border: '1px solid rgba(240, 84, 138, 0.2)', borderRadius: '8px', fontSize: '0.85rem', color: 'var(--primary-pink-dark)', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                    <span style={{ fontWeight: '600' }}>Partial COD Terms:</span>
+                    <span>• You will pay <strong>₹500</strong> online now.</span>
+                    <span>• The remaining balance of <strong>₹{Math.max(0, cartTotal - 500)}</strong> will be collected as Cash/UPI on delivery.</span>
+                  </div>
+                )}
               </div>
 
               {/* Side Summary */}
@@ -600,7 +611,7 @@ export default function CartPage({ onContinueShopping, onSelectProductBySlug }) 
                 )}
 
                 <button type="submit" className="btn btn-primary btn-checkout" disabled={checkingOut}>
-                  {checkingOut ? 'Submitting Order...' : (addressForm.paymentMethod === 'COD' ? 'Place Order (COD)' : 'Place Order')} <ArrowRight size={18} />
+                  {checkingOut ? 'Submitting Order...' : (addressForm.paymentMethod === 'Partial COD' ? 'Pay ₹500 & Place Order' : 'Pay Full & Place Order')} <ArrowRight size={18} />
                 </button>
               </div>
             </form>

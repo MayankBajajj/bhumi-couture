@@ -21,7 +21,7 @@ const getRazorpayInstance = () => {
 // 1. Create Razorpay Order
 export const createRazorpayOrder = async (req, res, next) => {
   try {
-    const { items, totalAmount, shippingAddress } = req.body;
+    const { items, totalAmount, shippingAddress, isPartialCod } = req.body;
     const userId = req.user._id;
 
     if (!items || items.length === 0) {
@@ -58,13 +58,22 @@ export const createRazorpayOrder = async (req, res, next) => {
       });
     }
 
+    // Determine the online payment amount
+    let paymentAmount = calculatedAmount;
+    if (isPartialCod) {
+      paymentAmount = Math.min(500, calculatedAmount);
+    }
+
     const rzp = getRazorpayInstance();
     const rzpOrder = await rzp.orders.create({
-      amount: calculatedAmount * 100, // Razorpay amount in paise
+      amount: paymentAmount * 100, // Razorpay amount in paise
       currency: 'INR',
       receipt: `receipt_rzp_${Date.now()}`,
       notes: {
         shippingAddress,
+        isPartialCod: isPartialCod ? 'true' : 'false',
+        totalAmount: calculatedAmount.toString(),
+        partialAmount: paymentAmount.toString(),
         items: JSON.stringify(items.map(item => ({
           productId: item.productId,
           quantity: item.quantity,
@@ -79,7 +88,7 @@ export const createRazorpayOrder = async (req, res, next) => {
     await Payment.create({
       userId,
       razorpayOrderId: rzpOrder.id,
-      amount: calculatedAmount,
+      amount: paymentAmount,
       status: 'Created'
     });
 
@@ -95,7 +104,7 @@ export const createRazorpayOrder = async (req, res, next) => {
 };
 
 // Reusable Transactional Order Finalizer
-const finalizeOrderInTransaction = async (userId, razorpayOrderId, razorpayPaymentId, shippingAddress, items, totalAmount, paymentRefId) => {
+const finalizeOrderInTransaction = async (userId, razorpayOrderId, razorpayPaymentId, shippingAddress, items, totalAmount, paymentRefId, isPartialCod = false) => {
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
@@ -138,14 +147,14 @@ const finalizeOrderInTransaction = async (userId, razorpayOrderId, razorpayPayme
       })),
       totalAmount,
       shippingAddress,
-      paymentMethod: 'Online',
-      paymentStatus: 'Paid',
+      paymentMethod: isPartialCod ? 'Partial COD' : 'Online',
+      paymentStatus: isPartialCod ? 'Partially Paid' : 'Paid',
       status: 'Processing',
       razorpayOrderId,
       paymentReference: paymentRefId,
       timeline: [
-        { status: 'Pending', note: 'Order initiated via online payment.' },
-        { status: 'Paid', note: `Payment captured successfully. Transaction ID: ${razorpayPaymentId}` },
+        { status: 'Pending', note: isPartialCod ? 'Order initiated via partial online payment.' : 'Order initiated via online payment.' },
+        { status: isPartialCod ? 'Partially Paid' : 'Paid', note: isPartialCod ? `Paid ₹500 partially online. Remaining balance COD. Transaction ID: ${razorpayPaymentId}` : `Payment captured successfully. Transaction ID: ${razorpayPaymentId}` },
         { status: 'Processing', note: 'Inventory allocated. Order is preparing for shipment.' }
       ]
     }], { session });
@@ -203,6 +212,13 @@ export const verifyRazorpayPayment = async (req, res, next) => {
       return res.status(404).json({ message: 'Payment reference record not found' });
     }
 
+    // Fetch verified notes from Razorpay to guarantee accuracy
+    const rzp = getRazorpayInstance();
+    const rzpOrderDetails = await rzp.orders.fetch(razorpay_order_id);
+    const notes = rzpOrderDetails.notes || {};
+    const isPartialCod = notes.isPartialCod === 'true';
+    const orderTotal = notes.totalAmount ? parseFloat(notes.totalAmount) : payment.amount;
+
     // Execute order creation in database transaction
     const { order, alreadyProcessed } = await finalizeOrderInTransaction(
       userId,
@@ -210,8 +226,9 @@ export const verifyRazorpayPayment = async (req, res, next) => {
       razorpay_payment_id,
       shippingDetails.shippingAddress,
       shippingDetails.items,
-      payment.amount,
-      payment._id
+      orderTotal,
+      payment._id,
+      isPartialCod
     );
 
     // Trigger async Shiprocket sync in the background
@@ -298,14 +315,18 @@ export const razorpayWebhook = async (req, res, next) => {
         }
 
         if (items.length > 0 && shippingAddress) {
+          const isPartialCod = notes.isPartialCod === 'true';
+          const orderTotal = notes.totalAmount ? parseFloat(notes.totalAmount) : payment.amount;
+
           const { order } = await finalizeOrderInTransaction(
             payment.userId,
             razorpayOrderId,
             razorpayPaymentId,
             shippingAddress,
             items,
-            payment.amount,
-            payment._id
+            orderTotal,
+            payment._id,
+            isPartialCod
           );
 
           // Trigger async Shiprocket sync
