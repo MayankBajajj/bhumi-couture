@@ -1,4 +1,6 @@
 import Order from '../models/Order.js';
+import Product from '../models/Product.js';
+import User from '../models/User.js';
 
 let cachedToken = null;
 let tokenExpiry = null;
@@ -82,10 +84,11 @@ const parseAddressString = (addressStr) => {
   }
 };
 
-// Creates an order in Shiprocket
 export const syncOrderToShiprocket = async (orderId) => {
   try {
-    const order = await Order.findById(orderId).populate('items.productId');
+    const order = await Order.findById(orderId)
+      .populate('userId', 'email')
+      .populate('items.productId');
     if (!order) {
       throw new Error(`Order ${orderId} not found`);
     }
@@ -99,6 +102,44 @@ export const syncOrderToShiprocket = async (orderId) => {
     const address = parseAddressString(order.shippingAddress);
     const pickupLocation = (process.env.SHIPROCKET_PICKUP_LOCATION || "Home").trim();
 
+    const isPartialCod = order.paymentMethod === 'Partial COD';
+    const isCod = order.paymentMethod === 'COD' || isPartialCod;
+    let remainingCodAmount = order.totalAmount;
+    if (isPartialCod) {
+      remainingCodAmount = Math.max(0, order.totalAmount - 500);
+    }
+
+    // Distribute remainingCodAmount proportionally across items to keep totals matching
+    let allocatedAmount = 0;
+    const orderItems = order.items.map((item, idx) => {
+      let itemSellingPrice = item.price;
+
+      if (isPartialCod) {
+        const ratio = order.totalAmount > 0 ? (remainingCodAmount / order.totalAmount) : 0;
+        itemSellingPrice = Math.round(item.price * ratio);
+        
+        if (idx === order.items.length - 1) {
+          const currentTotal = allocatedAmount + (itemSellingPrice * item.quantity);
+          const diff = remainingCodAmount - currentTotal;
+          itemSellingPrice += Math.round(diff / item.quantity);
+        }
+      }
+
+      allocatedAmount += itemSellingPrice * item.quantity;
+
+      const prodName = item.productId ? item.productId.name : 'Unknown Product';
+      const prodSku = (item.productId && item.productId.sku) ? item.productId.sku : `SKU-${item.productId ? item.productId._id.toString().slice(-6) : Math.random().toString().slice(-6)}`;
+
+      return {
+        name: prodName,
+        sku: prodSku,
+        units: item.quantity,
+        selling_price: itemSellingPrice
+      };
+    });
+
+    const userEmail = (order.userId && order.userId.email) ? order.userId.email : "bhawnacloset.customer@gmail.com";
+
     const payload = {
       order_id: order._id.toString(),
       order_date: new Date(order.createdAt).toISOString().slice(0, 16).replace('T', ' '),
@@ -110,7 +151,7 @@ export const syncOrderToShiprocket = async (orderId) => {
       billing_pincode: address.pincode,
       billing_state: address.state,
       billing_country: "India",
-      billing_email: order.userId.email || "bhawnacloset.customer@gmail.com",
+      billing_email: userEmail,
       billing_phone: address.phone,
       shipping_is_billing: true,
       shipping_customer_name: address.name.split(' ')[0] || 'Customer',
@@ -120,18 +161,13 @@ export const syncOrderToShiprocket = async (orderId) => {
       shipping_pincode: address.pincode,
       shipping_state: address.state,
       shipping_country: "India",
-      shipping_email: order.userId.email || "bhawnacloset.customer@gmail.com",
+      shipping_email: userEmail,
       shipping_phone: address.phone,
-      order_items: order.items.map(item => ({
-        name: item.productId.name,
-        sku: item.productId.sku || `SKU-${item.productId._id.toString().slice(-6)}`,
-        units: item.quantity,
-        selling_price: item.price
-      })),
-      payment_method: order.paymentMethod === 'COD' ? 'COD' : 'Prepaid',
-      sub_total: order.totalAmount,
+      order_items: orderItems,
+      payment_method: isCod ? 'COD' : 'Prepaid',
+      sub_total: isPartialCod ? remainingCodAmount : order.totalAmount,
       length: 10,
-      width: 10,
+      breadth: 10,
       height: 10,
       weight: 0.5
     };
