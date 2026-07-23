@@ -132,6 +132,22 @@ export default function AdminDashboard() {
     }
   };
 
+  // Trigger online payment refund & cancel order
+  const handleOrderRefund = async (orderId) => {
+    if (window.confirm('Are you sure you want to trigger a full refund in Razorpay for the online paid amount and cancel this order? This action is irreversible.')) {
+      try {
+        setLoadingOrders(true);
+        const res = await adminService.refundOrder(orderId);
+        alert(res.message || 'Refund successfully issued in Razorpay!');
+        fetchOrders();
+      } catch (err) {
+        alert(err.message || 'Failed to issue refund.');
+      } finally {
+        setLoadingOrders(false);
+      }
+    }
+  };
+
   useEffect(() => {
     if (activeSubTab === 'overview') {
       fetchStats();
@@ -1133,10 +1149,21 @@ export default function AdminDashboard() {
                                     Deliver Order
                                   </button>
                                 )}
-                                {['Rejected', 'Cancelled', 'Delivered'].includes(order.status) && (
-                                  <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Completed</span>
-                                )}
-                              </div>
+                                 {['Online', 'Partial COD'].includes(order.paymentMethod) && 
+                                  ['Paid', 'Partially Paid'].includes(order.paymentStatus) && 
+                                  !['Cancelled', 'Rejected'].includes(order.status) && (
+                                   <button 
+                                     className="order-btn-reject" 
+                                     onClick={() => handleOrderRefund(order._id)}
+                                     style={{ backgroundColor: '#dc3545', color: '#fff', border: 'none', padding: '0.25rem 0.5rem', borderRadius: '4px', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 'bold' }}
+                                   >
+                                     Refund &amp; Cancel
+                                   </button>
+                                 )}
+                                 {['Rejected', 'Cancelled', 'Delivered'].includes(order.status) && (
+                                   <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Completed</span>
+                                 )}
+                               </div>
                             </td>
                           </tr>
                         );

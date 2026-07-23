@@ -48,5 +48,14 @@ export const adminService = {
       },
       body: JSON.stringify({ status })
     }, true);
+  },
+
+  refundOrder: async (id) => {
+    return await request(`/admin/orders/${id}/refund`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }, true);
   }
 };

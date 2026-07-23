@@ -340,6 +340,37 @@ export const razorpayWebhook = async (req, res, next) => {
           throw new Error('Could not retrieve items or shippingAddress to finalize order via webhook');
         }
       }
+    } else if (eventData.event === 'payment.refunded') {
+      const paymentEntity = eventData.payload.payment.entity;
+      const razorpayOrderId = paymentEntity.order_id;
+
+      // Find the corresponding payment record
+      const payment = await Payment.findOne({ razorpayOrderId });
+      if (payment) {
+        payment.status = 'Refunded';
+        await payment.save();
+
+        // Find corresponding Order and update it
+        const order = await Order.findOne({ razorpayOrderId });
+        if (order && order.paymentStatus !== 'Refunded') {
+          order.paymentStatus = 'Refunded';
+          order.status = 'Cancelled';
+          order.timeline.push({
+            status: 'Cancelled',
+            note: `Payment refunded via Razorpay Webhook. Refunded amount: ₹${payment.amount}`
+          });
+          
+          // Restore stock inventory
+          for (const item of order.items) {
+            await Product.updateOne(
+              { _id: item.productId, 'sizes.size': item.size },
+              { $inc: { 'sizes.$[elem].stock': item.quantity } },
+              { arrayFilters: [{ 'elem.size': item.size }] }
+            );
+          }
+          await order.save();
+        }
+      }
     }
 
     res.status(200).send('OK');

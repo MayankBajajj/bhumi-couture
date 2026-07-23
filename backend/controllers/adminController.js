@@ -4,6 +4,8 @@ import Product from '../models/Product.js';
 import Inquiry from '../models/Inquiry.js';
 import Order from '../models/Order.js';
 import Category from '../models/Category.js';
+import Payment from '../models/Payment.js';
+import Razorpay from 'razorpay';
 import { generateToken } from '../services/userService.js';
 import { isCloudinaryConfigured } from '../config/cloudinary.js';
 import { syncOrderToShiprocket } from '../services/shiprocketService.js';
@@ -316,5 +318,73 @@ export const updateOrderStatus = async (req, res, next) => {
   } catch (error) {
     res.status(500);
     next(error);
+  }
+};
+
+export const refundOrder = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const order = await Order.findById(id);
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+
+    if (!order.razorpayOrderId) {
+      return res.status(400).json({ message: 'Order does not have a Razorpay online payment associated' });
+    }
+
+    if (order.paymentStatus === 'Refunded') {
+      return res.status(400).json({ message: 'Order is already fully refunded' });
+    }
+
+    // Find the successful payment record
+    const payment = await Payment.findOne({
+      razorpayOrderId: order.razorpayOrderId,
+      status: 'Captured'
+    });
+
+    if (!payment || !payment.razorpayPaymentId) {
+      return res.status(400).json({ message: 'No captured payment transaction found to refund' });
+    }
+
+    // Initialize Razorpay
+    const keyId = process.env.RAZORPAY_KEY_ID;
+    const keySecret = process.env.RAZORPAY_KEY_SECRET;
+    if (!keyId || !keySecret) {
+      return res.status(500).json({ message: 'Razorpay credentials not configured in environment variables' });
+    }
+    const rzp = new Razorpay({ key_id: keyId, key_secret: keySecret });
+
+    // Call Razorpay API to issue full refund of the captured online amount
+    const refund = await rzp.payments.refund(payment.razorpayPaymentId, {
+      amount: payment.amount * 100 // amount in paise
+    });
+
+    // Update payment record
+    payment.status = 'Refunded';
+    await payment.save();
+
+    // Update order record
+    order.paymentStatus = 'Refunded';
+    order.status = 'Cancelled';
+    order.timeline.push({
+      status: 'Cancelled',
+      note: `Order refunded and cancelled. Refund ID: ${refund.id}. Refunded online amount: ₹${payment.amount}`
+    });
+
+    // Restore stock inventory
+    for (const item of order.items) {
+      await Product.updateOne(
+        { _id: item.productId, 'sizes.size': item.size },
+        { $inc: { 'sizes.$[elem].stock': item.quantity } },
+        { arrayFilters: [{ 'elem.size': item.size }] }
+      );
+    }
+
+    await order.save();
+
+    res.json({ message: 'Order refunded and cancelled successfully', order });
+  } catch (error) {
+    res.status(500).json({ message: error.message || 'Failed to trigger refund in Razorpay' });
   }
 };

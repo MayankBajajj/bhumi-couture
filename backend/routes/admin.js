@@ -6,7 +6,8 @@ import {
   updateProduct, 
   deleteProduct,
   getOrders,
-  updateOrderStatus
+  updateOrderStatus,
+  refundOrder
 } from '../controllers/adminController.js';
 import { protectAdmin } from '../middleware/adminMiddleware.js';
 import { parser } from '../config/cloudinary.js';
@@ -24,5 +25,6 @@ router.delete('/products/:id', protectAdmin, deleteProduct);
 // Order management routes
 router.get('/orders', protectAdmin, getOrders);
 router.put('/orders/:id/status', protectAdmin, updateOrderStatus);
+router.post('/orders/:id/refund', protectAdmin, refundOrder);
 
 export default router;
