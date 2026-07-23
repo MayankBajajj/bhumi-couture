@@ -80,7 +80,7 @@ function AppContent() {
   useEffect(() => {
     const fetchNewArrivals = async () => {
       try {
-        const response = await productService.getProducts({ page: 1, limit: 4, sort: 'newest' });
+        const response = await productService.getProducts({ page: 1, limit: 4, sort: 'newest', groupVariants: true });
         setNewArrivals(response.products || []);
       } catch (err) {
         console.error('Error fetching home page products:', err);
@@ -99,7 +99,8 @@ function AppContent() {
           limit: 8,
           category: categoryFilter,
           search: searchQuery,
-          sort: sortBy
+          sort: sortBy,
+          groupVariants: true
         });
         setShopProducts(data.products || []);
         setTotalPages(data.pagination?.totalPages || 1);

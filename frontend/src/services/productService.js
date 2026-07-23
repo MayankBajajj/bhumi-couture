@@ -1,13 +1,14 @@
 import { request } from './api';
 
 export const productService = {
-  getProducts: async ({ page = 1, limit = 12, category = 'All', search = '', sort = 'newest' } = {}) => {
+  getProducts: async ({ page = 1, limit = 12, category = 'All', search = '', sort = 'newest', groupVariants = false } = {}) => {
     const params = new URLSearchParams();
     params.append('page', page);
     params.append('limit', limit);
     if (category) params.append('category', category);
     if (search) params.append('search', search);
     if (sort) params.append('sort', sort);
+    if (groupVariants) params.append('groupVariants', 'true');
 
     return await request(`/products?${params.toString()}`, {
       method: 'GET'

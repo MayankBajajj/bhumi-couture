@@ -1,6 +1,6 @@
 import Product from '../models/Product.js';
 
-export const getProductsService = async ({ page = 1, limit = 12, category, search, sort }) => {
+export const getProductsService = async ({ page = 1, limit = 12, category, search, sort, groupVariants = false }) => {
   const query = { isDeleted: { $ne: true } };
 
   if (category && category !== 'All') {
@@ -51,23 +51,66 @@ export const getProductsService = async ({ page = 1, limit = 12, category, searc
 
   const parsedPage = parseInt(page);
   const parsedLimit = parseInt(limit);
-  const skip = (parsedPage - 1) * parsedLimit;
 
-  const totalProducts = await Product.countDocuments(query);
-  const products = await Product.find(query)
-    .sort(sortQuery)
-    .skip(skip)
-    .limit(parsedLimit);
+  if (groupVariants === 'true' || groupVariants === true) {
+    // Fetch all matching products without pagination limits
+    const allProducts = await Product.find(query).sort(sortQuery);
 
-  return {
-    products,
-    pagination: {
-      totalProducts,
-      totalPages: Math.ceil(totalProducts / parsedLimit),
-      currentPage: parsedPage,
-      limit: parsedLimit
+    // Filter out duplicates in memory
+    const filteredProducts = [];
+    const seenGroupReps = new Set();
+
+    for (const p of allProducts) {
+      const variantIds = (p.colorVariants || [])
+        .map(v => {
+          if (!v || !v.product) return null;
+          return (v.product._id || v.product).toString();
+        })
+        .filter(Boolean);
+
+      const groupIds = [p._id.toString(), ...variantIds];
+      groupIds.sort();
+      const repId = groupIds[0];
+
+      if (!seenGroupReps.has(repId)) {
+        seenGroupReps.add(repId);
+        filteredProducts.push(p);
+      }
     }
-  };
+
+    // Paginate the filtered list
+    const skip = (parsedPage - 1) * parsedLimit;
+    const paginatedProducts = filteredProducts.slice(skip, skip + parsedLimit);
+    const totalProducts = filteredProducts.length;
+
+    return {
+      products: paginatedProducts,
+      pagination: {
+        totalProducts,
+        totalPages: Math.ceil(totalProducts / parsedLimit),
+        currentPage: parsedPage,
+        limit: parsedLimit
+      }
+    };
+  } else {
+    // Standard un-grouped query (for Admin Dashboard and product selector lists)
+    const skip = (parsedPage - 1) * parsedLimit;
+    const totalProducts = await Product.countDocuments(query);
+    const products = await Product.find(query)
+      .sort(sortQuery)
+      .skip(skip)
+      .limit(parsedLimit);
+
+    return {
+      products,
+      pagination: {
+        totalProducts,
+        totalPages: Math.ceil(totalProducts / parsedLimit),
+        currentPage: parsedPage,
+        limit: parsedLimit
+      }
+    };
+  }
 };
 
 export const getProductBySlugService = async (slug) => {

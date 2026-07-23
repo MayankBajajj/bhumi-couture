@@ -851,7 +851,7 @@ export default function AdminDashboard() {
                         >
                           <option value="">-- Choose Product --</option>
                           {allProductsList
-                            .filter(p => p._id !== editProductId)
+                            .filter(p => p._id !== editProductId && p.category === formData.category)
                             .map(p => (
                               <option key={p._id} value={p._id}>{p.name} ({p.slug})</option>
                             ))
