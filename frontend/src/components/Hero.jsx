@@ -7,23 +7,7 @@ export default function Hero({ onExploreClick, newArrivals = [], onSelectProduct
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
   const scrollRef = useRef(null);
 
-  const activeBanners = banners.length > 0 ? banners : [
-    {
-      _id: 'fallback-1',
-      imageUrl: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=1200&auto=format&fit=crop',
-      linkUrl: ''
-    },
-    {
-      _id: 'fallback-2',
-      imageUrl: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=1200&auto=format&fit=crop',
-      linkUrl: ''
-    },
-    {
-      _id: 'fallback-3',
-      imageUrl: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?q=80&w=1200&auto=format&fit=crop',
-      linkUrl: ''
-    }
-  ];
+  const activeBanners = banners;
 
   // Auto-play banners
   useEffect(() => {
@@ -57,20 +41,24 @@ export default function Hero({ onExploreClick, newArrivals = [], onSelectProduct
         
         {/* 1. Banner Slideshow Block (Desktop: Column 1, Mobile: Order 1) */}
         <div className="hero-banner-slideshow animate-fade-in">
-          {activeBanners.map((banner, index) => (
-            <div
-              key={banner._id}
-              className={`banner-slide-item ${index === currentBannerIndex ? 'active' : ''}`}
-            >
-              {banner.linkUrl ? (
-                <a href={banner.linkUrl}>
+          {activeBanners.length === 0 ? (
+            <div className="banner-slide-skeleton"></div>
+          ) : (
+            activeBanners.map((banner, index) => (
+              <div
+                key={banner._id}
+                className={`banner-slide-item ${index === currentBannerIndex ? 'active' : ''}`}
+              >
+                {banner.linkUrl ? (
+                  <a href={banner.linkUrl}>
+                    <img src={banner.imageUrl} alt="Bhawna Closet Banner" className="banner-slide-img" />
+                  </a>
+                ) : (
                   <img src={banner.imageUrl} alt="Bhawna Closet Banner" className="banner-slide-img" />
-                </a>
-              ) : (
-                <img src={banner.imageUrl} alt="Bhawna Closet Banner" className="banner-slide-img" />
-              )}
-            </div>
-          ))}
+                )}
+              </div>
+            ))
+          )}
           {/* Navigation Arrows */}
           {activeBanners.length > 1 && (
             <>
@@ -288,6 +276,17 @@ export default function Hero({ onExploreClick, newArrivals = [], onSelectProduct
           width: 100%;
           height: 100%;
           object-fit: fill;
+        }
+        .banner-slide-skeleton {
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(90deg, #fff5f7 25%, #ffeef2 50%, #fff5f7 75%);
+          background-size: 200% 100%;
+          animation: banner-shimmer 1.5s infinite;
+        }
+        @keyframes banner-shimmer {
+          0% { background-position: 200% 0; }
+          100% { background-position: -200% 0; }
         }
         .banner-nav-btn {
           position: absolute;
