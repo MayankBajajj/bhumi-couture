@@ -711,8 +711,8 @@ Error generating stack: `+e.message+`
         }
         .hero-stories-container {
           position: absolute;
-          top: -95px;
-          left: -140px;
+          top: -105px;
+          left: -180px;
           display: flex;
           gap: 1.25rem;
           justify-content: flex-start;
@@ -733,8 +733,8 @@ Error generating stack: `+e.message+`
         }
         .hero-story-bubble {
           position: relative;
-          width: 76px;
-          height: 76px;
+          width: 88px;
+          height: 88px;
           border-radius: 50%;
           display: flex;
           align-items: center;
@@ -757,20 +757,20 @@ Error generating stack: `+e.message+`
           z-index: 1;
         }
         .hero-story-img {
-          width: 68px;
-          height: 68px;
+          width: 80px;
+          height: 80px;
           border-radius: 50%;
           object-fit: cover;
           border: 2px solid var(--pure-white);
           z-index: 2;
         }
         .hero-story-name {
-          font-size: 0.75rem;
+          font-size: 0.8rem;
           font-weight: 700;
           color: var(--dark-charcoal);
           text-transform: capitalize;
           text-align: center;
-          max-width: 75px;
+          max-width: 88px;
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
@@ -926,16 +926,16 @@ Error generating stack: `+e.message+`
             gap: 0.75rem !important;
           }
           .mobile-only-stories .hero-story-bubble {
-            width: 52px !important;
-            height: 52px !important;
+            width: 62px !important;
+            height: 62px !important;
           }
           .mobile-only-stories .hero-story-img {
-            width: 46px !important;
-            height: 46px !important;
+            width: 56px !important;
+            height: 56px !important;
           }
           .mobile-only-stories .hero-story-name {
-            font-size: 0.65rem !important;
-            max-width: 60px !important;
+            font-size: 0.7rem !important;
+            max-width: 70px !important;
           }
           .hero-image-wrapper {
             margin-top: -0.75rem !important;
