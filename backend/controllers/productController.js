@@ -3,8 +3,8 @@ import Category from '../models/Category.js';
 
 export const getProducts = async (req, res, next) => {
   try {
-    const { page, limit, category, search, sort, groupVariants } = req.query;
-    const result = await getProductsService({ page, limit, category, search, sort, groupVariants });
+    const { page, limit, category, search, sort, groupVariants, isNewArrival, isFeatured } = req.query;
+    const result = await getProductsService({ page, limit, category, search, sort, groupVariants, isNewArrival, isFeatured });
     res.json(result);
   } catch (error) {
     res.status(500);
