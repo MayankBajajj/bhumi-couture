@@ -250,8 +250,8 @@ function AppContent() {
             <div className="container about-container">
               <div className="about-image-side">
                 <img 
-                  src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=800&auto=format&fit=crop" 
-                  alt="Inside Bhawna Closet Boutique" 
+                  src="https://res.cloudinary.com/jbhylwfb/image/upload/v1782904627/bhawna_closet_products/xe17qrmuztgeb3afmyil.jpg" 
+                  alt="Bhawna Closet Boutique Collection" 
                   className="about-image"
                 />
               </div>
