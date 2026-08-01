@@ -1,10 +1,48 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { ArrowRight, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
 import StoriesViewer from './StoriesViewer';
 
-export default function Hero({ onExploreClick, newArrivals = [], onSelectProduct, stories = [] }) {
+export default function Hero({ onExploreClick, newArrivals = [], onSelectProduct, stories = [], banners = [] }) {
   const [activeStory, setActiveStory] = useState(null);
+  const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
   const scrollRef = useRef(null);
+
+  const activeBanners = banners.length > 0 ? banners : [
+    {
+      _id: 'fallback-1',
+      imageUrl: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=1200&auto=format&fit=crop',
+      linkUrl: ''
+    },
+    {
+      _id: 'fallback-2',
+      imageUrl: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=1200&auto=format&fit=crop',
+      linkUrl: ''
+    },
+    {
+      _id: 'fallback-3',
+      imageUrl: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?q=80&w=1200&auto=format&fit=crop',
+      linkUrl: ''
+    }
+  ];
+
+  // Auto-play banners
+  useEffect(() => {
+    if (activeBanners.length <= 1) return;
+    const timer = setInterval(() => {
+      setCurrentBannerIndex((prev) => (prev + 1) % activeBanners.length);
+    }, 4500);
+    return () => clearInterval(timer);
+  }, [activeBanners.length]);
+
+  const nextBanner = () => {
+    if (activeBanners.length === 0) return;
+    setCurrentBannerIndex((prev) => (prev + 1) % activeBanners.length);
+  };
+
+  const prevBanner = () => {
+    if (activeBanners.length === 0) return;
+    setCurrentBannerIndex((prev) => (prev - 1 + activeBanners.length) % activeBanners.length);
+  };
 
   const handleScroll = (direction) => {
     if (scrollRef.current) {
@@ -17,11 +55,43 @@ export default function Hero({ onExploreClick, newArrivals = [], onSelectProduct
     <section className="hero-section">
       <div className="container hero-container">
         
-        {/* 1. Header Block (Desktop: Column 1, Mobile: Order 1) */}
-        <div className="hero-header-block animate-fade-in">
-          <h1>
-            Redefining <span className="highlight-text">Elegance</span> &amp; Modern Style
-          </h1>
+        {/* 1. Banner Slideshow Block (Desktop: Column 1, Mobile: Order 1) */}
+        <div className="hero-banner-slideshow animate-fade-in">
+          {activeBanners.map((banner, index) => (
+            <div
+              key={banner._id}
+              className={`banner-slide-item ${index === currentBannerIndex ? 'active' : ''}`}
+            >
+              {banner.linkUrl ? (
+                <a href={banner.linkUrl}>
+                  <img src={banner.imageUrl} alt="Bhawna Closet Banner" className="banner-slide-img" />
+                </a>
+              ) : (
+                <img src={banner.imageUrl} alt="Bhawna Closet Banner" className="banner-slide-img" />
+              )}
+            </div>
+          ))}
+          {/* Navigation Arrows */}
+          {activeBanners.length > 1 && (
+            <>
+              <button className="banner-nav-btn banner-nav-left" onClick={prevBanner} title="Previous Banner">
+                <ChevronLeft size={20} />
+              </button>
+              <button className="banner-nav-btn banner-nav-right" onClick={nextBanner} title="Next Banner">
+                <ChevronRight size={20} />
+              </button>
+              {/* Pagination Dots */}
+              <div className="banner-pagination">
+                {activeBanners.map((_, idx) => (
+                  <div
+                    key={idx}
+                    className={`banner-page-dot ${idx === currentBannerIndex ? 'active' : ''}`}
+                    onClick={() => setCurrentBannerIndex(idx)}
+                  />
+                ))}
+              </div>
+            </>
+          )}
         </div>
 
         {/* 2. Stories Block - Mobile Only (Desktop: hidden, Mobile: Order 2) */}
@@ -187,10 +257,86 @@ export default function Hero({ onExploreClick, newArrivals = [], onSelectProduct
           align-items: center;
           gap: 2rem 3rem;
         }
-        .hero-header-block {
+        .hero-banner-slideshow {
           grid-column: 1;
           grid-row: 1;
           z-index: 10;
+          position: relative;
+          width: 100%;
+          height: 380px;
+          border-radius: 16px;
+          overflow: hidden;
+          box-shadow: var(--shadow-md);
+          background: var(--border-light);
+        }
+        .banner-slide-item {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          opacity: 0;
+          transition: opacity 0.6s ease-in-out;
+          z-index: 1;
+        }
+        .banner-slide-item.active {
+          opacity: 1;
+          z-index: 2;
+        }
+        .banner-slide-img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+        .banner-nav-btn {
+          position: absolute;
+          top: 50%;
+          transform: translateY(-50%);
+          background: rgba(255, 255, 255, 0.85);
+          color: var(--dark-charcoal);
+          border: none;
+          width: 38px;
+          height: 38px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          z-index: 10;
+          box-shadow: var(--shadow-sm);
+          transition: all 0.2s ease;
+        }
+        .banner-nav-btn:hover {
+          background: var(--primary-pink);
+          color: var(--pure-white);
+          transform: translateY(-50%) scale(1.05);
+        }
+        .banner-nav-left {
+          left: 12px;
+        }
+        .banner-nav-right {
+          right: 12px;
+        }
+        .banner-pagination {
+          position: absolute;
+          bottom: 12px;
+          left: 50%;
+          transform: translateX(-50%);
+          display: flex;
+          gap: 6px;
+          z-index: 10;
+        }
+        .banner-page-dot {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background: rgba(255, 255, 255, 0.5);
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+        .banner-page-dot:hover, .banner-page-dot.active {
+          background: var(--pure-white);
+          transform: scale(1.2);
         }
         .hero-products-block {
           grid-column: 1;
@@ -208,17 +354,6 @@ export default function Hero({ onExploreClick, newArrivals = [], onSelectProduct
           font-size: 0.8rem;
           font-weight: 600;
           letter-spacing: 0.03em;
-        }
-        .hero-header-block h1 {
-          font-size: 3.5rem;
-          line-height: 1.15;
-          color: var(--dark-charcoal);
-          margin-bottom: 0.5rem;
-        }
-        .highlight-text {
-          color: var(--primary-pink);
-          position: relative;
-          font-style: italic;
         }
         .hero-new-arrivals-wrapper {
           position: relative;
@@ -395,7 +530,7 @@ export default function Hero({ onExploreClick, newArrivals = [], onSelectProduct
         .hero-stories-container {
           position: absolute;
           top: -105px;
-          left: -180px;
+          left: -60px;
           display: flex;
           gap: 1.25rem;
           justify-content: flex-start;
@@ -525,25 +660,21 @@ export default function Hero({ onExploreClick, newArrivals = [], onSelectProduct
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 2rem;
+            gap: 1.5rem;
             text-align: center;
           }
-          .hero-header-block {
+          .hero-banner-slideshow {
             order: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
             width: 100%;
-          }
-          .hero-header-block h1 {
-            font-size: 2.75rem;
+            height: 320px;
+            border-radius: 12px;
           }
           .mobile-only-stories {
             display: flex !important;
             order: 2;
             position: static;
             transform: none !important;
-            margin: 1.5rem auto;
+            margin: 1rem auto;
             justify-content: center;
           }
           .desktop-only-stories {
@@ -554,6 +685,7 @@ export default function Hero({ onExploreClick, newArrivals = [], onSelectProduct
             width: 100%;
             display: flex;
             justify-content: center;
+            margin-top: 0 !important;
           }
           .hero-products-block {
             order: 4;
@@ -584,15 +716,21 @@ export default function Hero({ onExploreClick, newArrivals = [], onSelectProduct
         }
         @media (max-width: 576px) {
           .hero-section {
-            padding: 1.5rem 0 !important;
+            padding: 0 0 1.5rem 0 !important; /* start from very top edge on mobile */
           }
           .hero-container {
-            gap: 1.25rem !important;
+            gap: 1rem !important;
+            padding: 0 1.25rem !important;
           }
-          .hero-header-block h1 {
-            font-size: 2.1rem !important;
-            line-height: 1.25 !important;
-            margin-bottom: 0.85rem !important;
+          .hero-banner-slideshow {
+            order: 1;
+            width: calc(100% + 2.5rem) !important;
+            margin-left: -1.25rem !important;
+            margin-right: -1.25rem !important;
+            height: 35vh !important;
+            min-height: 210px;
+            max-height: 270px;
+            border-radius: 0 !important;
           }
           .hero-badge {
             margin-bottom: 0.5rem !important;
@@ -601,7 +739,7 @@ export default function Hero({ onExploreClick, newArrivals = [], onSelectProduct
             font-size: 0.75rem !important;
           }
           .mobile-only-stories {
-            margin: 0.25rem auto !important;
+            margin: 0.5rem auto !important;
             top: auto !important;
             left: auto !important;
             transform: none !important;
@@ -621,8 +759,8 @@ export default function Hero({ onExploreClick, newArrivals = [], onSelectProduct
             max-width: 70px !important;
           }
           .hero-image-wrapper {
-            margin-top: -0.75rem !important;
-            margin-bottom: -0.5rem !important;
+            margin-top: 0 !important;
+            margin-bottom: 0 !important;
           }
           .hero-new-arrivals-wrapper {
             margin: 0.25rem 0 0.75rem 0 !important;

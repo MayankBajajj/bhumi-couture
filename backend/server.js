@@ -18,9 +18,11 @@ import orderRoutes from './routes/orders.js';
 import paymentRoutes from './routes/payments.js';
 import shippingRoutes from './routes/shipping.js';
 import storiesRoutes from './routes/stories.js';
+import bannerRoutes from './routes/banners.js';
 
 import { errorHandler, notFound } from './middleware/errorMiddleware.js';
 import Admin from './models/Admin.js';
+import Banner from './models/Banner.js';
 import Category from './models/Category.js';
 import Product from './models/Product.js';
 import { startShiprocketSyncRetryLoop } from './services/shiprocketService.js';
@@ -99,6 +101,7 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/delivery', shippingRoutes);
 app.use('/api/stories', storiesRoutes);
+app.use('/api/banners', bannerRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
@@ -155,6 +158,32 @@ const seedAdminAndCategories = async () => {
         role: 'admin'
       });
       console.log(`Auto-seeded admin account: ${adminEmail}`);
+    }
+
+    // Seed default banner slides if none exist
+    const bannerCount = await Banner.countDocuments({});
+    if (bannerCount === 0) {
+      await Banner.create([
+        {
+          imageUrl: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=1200&auto=format&fit=crop',
+          cloudinaryId: 'seed_banner_1',
+          linkUrl: '',
+          order: 1
+        },
+        {
+          imageUrl: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=1200&auto=format&fit=crop',
+          cloudinaryId: 'seed_banner_2',
+          linkUrl: '',
+          order: 2
+        },
+        {
+          imageUrl: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?q=80&w=1200&auto=format&fit=crop',
+          cloudinaryId: 'seed_banner_3',
+          linkUrl: '',
+          order: 3
+        }
+      ]);
+      console.log('Auto-seeded default homepage banner slideshow images.');
     }
   } catch (err) {
     console.error('Error running startup auto-seeding:', err.message);

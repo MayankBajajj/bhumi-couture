@@ -3,6 +3,7 @@ import { Plus, Trash2, Edit, Save, X, Search, Check, AlertTriangle, AlertCircle,
 import { adminService } from '../services/adminService';
 import { productService } from '../services/productService';
 import AdminStoriesManager from './AdminStoriesManager';
+import AdminBannersManager from './AdminBannersManager';
 
 export default function AdminDashboard() {
   const [activeSubTab, setActiveSubTab] = useState('overview'); // overview, products, form, orders
@@ -497,6 +498,12 @@ export default function AdminDashboard() {
               onClick={() => setActiveSubTab('stories')}
             >
               Manage Stories
+            </button>
+            <button
+              className={`admin-tab-btn ${activeSubTab === 'banners' ? 'active' : ''}`}
+              onClick={() => setActiveSubTab('banners')}
+            >
+              Manage Banners
             </button>
             <button className="btn btn-primary admin-add-btn" onClick={openAddForm}>
               <Plus size={16} /> Add Product
@@ -1187,6 +1194,13 @@ export default function AdminDashboard() {
         {activeSubTab === 'stories' && (
           <div className="admin-content-area animate-fade-in">
             <AdminStoriesManager />
+          </div>
+        )}
+
+        {/* SUBTAB 6: MANAGE BANNERS */}
+        {activeSubTab === 'banners' && (
+          <div className="admin-content-area animate-fade-in">
+            <AdminBannersManager />
           </div>
         )}
 

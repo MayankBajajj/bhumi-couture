@@ -13,6 +13,7 @@ import { WishlistProvider } from './context/WishlistContext';
 // Services
 import { productService } from './services/productService';
 import { storyService } from './services/storyService';
+import { bannerService } from './services/bannerService';
 
 // Subcomponents / Page Views
 import Login from './components/Login';
@@ -90,19 +91,26 @@ function AppContent() {
     fetchNewArrivals();
   }, []);
 
-  // Instagram Stories state & fetching
+  // Instagram Stories & Banners state & fetching
   const [stories, setStories] = useState([]);
+  const [banners, setBanners] = useState([]);
   useEffect(() => {
-    const fetchStories = async () => {
+    const fetchStoriesAndBanners = async () => {
       try {
-        const data = await storyService.getStories();
-        setStories(data || []);
+        const storiesData = await storyService.getStories();
+        setStories(storiesData || []);
       } catch (err) {
         console.error('Error fetching stories:', err);
       }
+      try {
+        const bannersData = await bannerService.getBanners();
+        setBanners(bannersData || []);
+      } catch (err) {
+        console.error('Error fetching banners:', err);
+      }
     };
     if (activeTab === 'home') {
-      fetchStories();
+      fetchStoriesAndBanners();
     }
   }, [activeTab]);
 
@@ -178,6 +186,7 @@ function AppContent() {
           <Hero 
             newArrivals={newArrivals} 
             stories={stories}
+            banners={banners}
             onExploreClick={handleExploreClick} 
             onSelectProduct={handleSelectProduct} 
           />
