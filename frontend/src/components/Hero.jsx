@@ -14,7 +14,7 @@ export default function Hero({ onExploreClick, newArrivals = [], onSelectProduct
     if (activeBanners.length <= 1) return;
     const timer = setInterval(() => {
       setCurrentBannerIndex((prev) => (prev + 1) % activeBanners.length);
-    }, 4500);
+    }, 3000);
     return () => clearInterval(timer);
   }, [activeBanners.length]);
 
