@@ -727,9 +727,9 @@ export default function Hero({ onExploreClick, newArrivals = [], onSelectProduct
             width: calc(100% + 2.5rem) !important;
             margin-left: -1.25rem !important;
             margin-right: -1.25rem !important;
-            height: 25vh !important;
-            min-height: 150px;
-            max-height: 190px;
+            height: 22vh !important;
+            min-height: 135px;
+            max-height: 170px;
             border-radius: 0 !important;
           }
           .hero-badge {
