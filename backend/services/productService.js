@@ -1,18 +1,10 @@
 import Product from '../models/Product.js';
 
-export const getProductsService = async ({ page = 1, limit = 12, category, search, sort, isNewArrival, isFeatured, groupVariants = false }) => {
+export const getProductsService = async ({ page = 1, limit = 12, category, search, sort, groupVariants = false }) => {
   const query = { isDeleted: { $ne: true } };
 
   if (category && category !== 'All') {
     query.category = category;
-  }
-
-  if (isNewArrival === 'true' || isNewArrival === true) {
-    query.isNewArrival = true;
-  }
-
-  if (isFeatured === 'true' || isFeatured === true) {
-    query.isFeatured = true;
   }
 
   if (search) {

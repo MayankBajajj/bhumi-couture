@@ -80,7 +80,7 @@ function AppContent() {
   useEffect(() => {
     const fetchNewArrivals = async () => {
       try {
-        const response = await productService.getProducts({ page: 1, limit: 8, sort: 'newest', isNewArrival: true, groupVariants: true });
+        const response = await productService.getProducts({ page: 1, limit: 4, sort: 'newest', groupVariants: true });
         setNewArrivals(response.products || []);
       } catch (err) {
         console.error('Error fetching home page products:', err);
@@ -214,12 +214,12 @@ function AppContent() {
             </div>
           </section>
 
-          {/* New Arrivals Section */}
-          <section className="section new-arrivals-section" style={{ padding: '2.5rem 0' }}>
+          {/* New Arrivals Grid Section */}
+          <section className="section new-arrivals-section">
             <div className="container">
-              <div className="section-header" style={{ marginBottom: '1.25rem', textAlign: 'center' }}>
-                <h2 style={{ fontSize: '1.8rem', marginBottom: '0.25rem' }}>New Arrivals</h2>
-                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Fresh additions, selected just for you.</p>
+              <div className="section-header">
+                <h2>New Arrivals</h2>
+                <p>The freshest additions to our store, styled with a modern pink &amp; white aesthetic.</p>
               </div>
 
               {newArrivals.length === 0 ? (
@@ -227,7 +227,7 @@ function AppContent() {
                   <div className="pink-loader"></div>
                 </div>
               ) : (
-                <div className="new-arrivals-scroll-container">
+                <div className="products-grid">
                   {newArrivals.map((product) => (
                     <ProductCard
                       key={product._id}
@@ -238,7 +238,7 @@ function AppContent() {
                 </div>
               )}
 
-              <div className="view-all-box" style={{ marginTop: '1.5rem' }}>
+              <div className="view-all-box">
                 <button className="btn btn-primary" onClick={handleExploreClick}>
                   View All Products <ArrowRight size={18} />
                 </button>
@@ -903,35 +903,6 @@ function AppContent() {
           overflow: hidden;
           box-shadow: var(--shadow-sm);
           border: 1px solid var(--border-light);
-        /* Horizontal scroll list for New Arrivals */
-        .new-arrivals-scroll-container {
-          display: flex;
-          overflow-x: auto;
-          gap: 1.5rem;
-          padding: 1.25rem 0.5rem;
-          scroll-behavior: smooth;
-          -webkit-overflow-scrolling: touch;
-          scrollbar-width: none; /* Firefox */
-        }
-        .new-arrivals-scroll-container::-webkit-scrollbar {
-          display: none; /* Chrome, Safari, Edge */
-        }
-        .new-arrivals-scroll-container .product-card {
-          width: 280px !important;
-          min-width: 280px !important;
-          max-width: 280px !important;
-          flex: 0 0 auto !important;
-        }
-        @media (max-width: 576px) {
-          .new-arrivals-scroll-container {
-            gap: 1rem;
-            padding: 0.75rem 0.25rem;
-          }
-          .new-arrivals-scroll-container .product-card {
-            width: 210px !important;
-            min-width: 210px !important;
-            max-width: 210px !important;
-          }
         }
 
         /* Responsive Overrides */
