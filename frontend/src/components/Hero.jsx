@@ -263,7 +263,8 @@ export default function Hero({ onExploreClick, newArrivals = [], onSelectProduct
           z-index: 10;
           position: relative;
           width: 100%;
-          height: 380px;
+          height: auto;
+          aspect-ratio: 2.5;
           border-radius: 16px;
           overflow: hidden;
           box-shadow: var(--shadow-md);
@@ -286,7 +287,7 @@ export default function Hero({ onExploreClick, newArrivals = [], onSelectProduct
         .banner-slide-img {
           width: 100%;
           height: 100%;
-          object-fit: cover;
+          object-fit: fill;
         }
         .banner-nav-btn {
           position: absolute;
@@ -530,7 +531,7 @@ export default function Hero({ onExploreClick, newArrivals = [], onSelectProduct
         .hero-stories-container {
           position: absolute;
           top: -105px;
-          left: -60px;
+          left: 20px;
           display: flex;
           gap: 1.25rem;
           justify-content: flex-start;
