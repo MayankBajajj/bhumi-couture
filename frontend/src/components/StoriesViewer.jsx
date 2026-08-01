@@ -35,6 +35,15 @@ export default function StoriesViewer({ story, onClose }) {
     }
   };
 
+  // Lock body scroll when stories viewer is open
+  useEffect(() => {
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = originalOverflow || '';
+    };
+  }, []);
+
   // Progress bar animation loop
   useEffect(() => {
     if (!currentSub) return;
