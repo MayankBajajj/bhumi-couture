@@ -530,7 +530,7 @@ export default function Hero({ onExploreClick, newArrivals = [], onSelectProduct
         }
         .hero-stories-container {
           position: absolute;
-          top: -105px;
+          top: -125px;
           left: 20px;
           display: flex;
           gap: 1.25rem;
@@ -552,8 +552,8 @@ export default function Hero({ onExploreClick, newArrivals = [], onSelectProduct
         }
         .hero-story-bubble {
           position: relative;
-          width: 88px;
-          height: 88px;
+          width: 98px;
+          height: 98px;
           border-radius: 50%;
           display: flex;
           align-items: center;
@@ -576,20 +576,20 @@ export default function Hero({ onExploreClick, newArrivals = [], onSelectProduct
           z-index: 1;
         }
         .hero-story-img {
-          width: 80px;
-          height: 80px;
+          width: 90px;
+          height: 90px;
           border-radius: 50%;
           object-fit: cover;
           border: 2px solid var(--pure-white);
           z-index: 2;
         }
         .hero-story-name {
-          font-size: 0.8rem;
+          font-size: 0.85rem;
           font-weight: 700;
           color: var(--dark-charcoal);
           text-transform: capitalize;
           text-align: center;
-          max-width: 88px;
+          max-width: 98px;
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
@@ -728,9 +728,9 @@ export default function Hero({ onExploreClick, newArrivals = [], onSelectProduct
             width: calc(100% + 2.5rem) !important;
             margin-left: -1.25rem !important;
             margin-right: -1.25rem !important;
-            height: 35vh !important;
-            min-height: 210px;
-            max-height: 270px;
+            height: 31vh !important;
+            min-height: 190px;
+            max-height: 240px;
             border-radius: 0 !important;
           }
           .hero-badge {
@@ -748,16 +748,16 @@ export default function Hero({ onExploreClick, newArrivals = [], onSelectProduct
             gap: 0.75rem !important;
           }
           .mobile-only-stories .hero-story-bubble {
-            width: 62px !important;
-            height: 62px !important;
+            width: 72px !important;
+            height: 72px !important;
           }
           .mobile-only-stories .hero-story-img {
-            width: 56px !important;
-            height: 56px !important;
+            width: 66px !important;
+            height: 66px !important;
           }
           .mobile-only-stories .hero-story-name {
-            font-size: 0.7rem !important;
-            max-width: 70px !important;
+            font-size: 0.75rem !important;
+            max-width: 76px !important;
           }
           .hero-image-wrapper {
             margin-top: 0 !important;
