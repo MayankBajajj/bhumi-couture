@@ -12,6 +12,7 @@ import { WishlistProvider } from './context/WishlistContext';
 
 // Services
 import { productService } from './services/productService';
+import { storyService } from './services/storyService';
 
 // Subcomponents / Page Views
 import Login from './components/Login';
@@ -80,7 +81,7 @@ function AppContent() {
   useEffect(() => {
     const fetchNewArrivals = async () => {
       try {
-        const response = await productService.getProducts({ page: 1, limit: 4, sort: 'newest', groupVariants: true });
+        const response = await productService.getProducts({ page: 1, limit: 10, sort: 'newest', isNewArrival: true, groupVariants: true });
         setNewArrivals(response.products || []);
       } catch (err) {
         console.error('Error fetching home page products:', err);
@@ -88,6 +89,22 @@ function AppContent() {
     };
     fetchNewArrivals();
   }, []);
+
+  // Instagram Stories state & fetching
+  const [stories, setStories] = useState([]);
+  useEffect(() => {
+    const fetchStories = async () => {
+      try {
+        const data = await storyService.getStories();
+        setStories(data || []);
+      } catch (err) {
+        console.error('Error fetching stories:', err);
+      }
+    };
+    if (activeTab === 'home') {
+      fetchStories();
+    }
+  }, [activeTab]);
 
   // Fetch Shop Products on filter/search/sort change
   useEffect(() => {
@@ -158,7 +175,12 @@ function AppContent() {
       {activeTab === 'home' && (
         <main className="home-view animate-fade-in">
           {/* Hero Banner Section */}
-          <Hero onExploreClick={handleExploreClick} />
+          <Hero 
+            newArrivals={newArrivals} 
+            stories={stories}
+            onExploreClick={handleExploreClick} 
+            onSelectProduct={handleSelectProduct} 
+          />
 
           {/* Categories Section */}
           <section className="section categories-section">
@@ -210,38 +232,6 @@ function AppContent() {
                     </div>
                   </div>
                 ))}
-              </div>
-            </div>
-          </section>
-
-          {/* New Arrivals Grid Section */}
-          <section className="section new-arrivals-section">
-            <div className="container">
-              <div className="section-header">
-                <h2>New Arrivals</h2>
-                <p>The freshest additions to our store, styled with a modern pink &amp; white aesthetic.</p>
-              </div>
-
-              {newArrivals.length === 0 ? (
-                <div className="loader-container">
-                  <div className="pink-loader"></div>
-                </div>
-              ) : (
-                <div className="products-grid">
-                  {newArrivals.map((product) => (
-                    <ProductCard
-                      key={product._id}
-                      product={product}
-                      onSelectProduct={handleSelectProduct}
-                    />
-                  ))}
-                </div>
-              )}
-
-              <div className="view-all-box">
-                <button className="btn btn-primary" onClick={handleExploreClick}>
-                  View All Products <ArrowRight size={18} />
-                </button>
               </div>
             </div>
           </section>

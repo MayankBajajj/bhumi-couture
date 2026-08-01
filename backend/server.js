@@ -17,6 +17,7 @@ import inquiryRoutes from './routes/inquiry.js';
 import orderRoutes from './routes/orders.js';
 import paymentRoutes from './routes/payments.js';
 import shippingRoutes from './routes/shipping.js';
+import storiesRoutes from './routes/stories.js';
 
 import { errorHandler, notFound } from './middleware/errorMiddleware.js';
 import Admin from './models/Admin.js';
@@ -96,6 +97,7 @@ app.use('/api/inquiries', inquiryRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/delivery', shippingRoutes);
+app.use('/api/stories', storiesRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

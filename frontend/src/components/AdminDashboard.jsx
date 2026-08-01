@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Trash2, Edit, Save, X, Search, Check, AlertTriangle, AlertCircle, ShoppingBag, Eye, Users, FileText, ArrowRight, Upload } from 'lucide-react';
 import { adminService } from '../services/adminService';
 import { productService } from '../services/productService';
+import AdminStoriesManager from './AdminStoriesManager';
 
 export default function AdminDashboard() {
   const [activeSubTab, setActiveSubTab] = useState('overview'); // overview, products, form, orders
@@ -490,6 +491,12 @@ export default function AdminDashboard() {
               onClick={() => setActiveSubTab('orders')}
             >
               Manage Orders
+            </button>
+            <button
+              className={`admin-tab-btn ${activeSubTab === 'stories' ? 'active' : ''}`}
+              onClick={() => setActiveSubTab('stories')}
+            >
+              Manage Stories
             </button>
             <button className="btn btn-primary admin-add-btn" onClick={openAddForm}>
               <Plus size={16} /> Add Product
@@ -1173,6 +1180,13 @@ export default function AdminDashboard() {
                 </div>
               )}
             </div>
+          </div>
+        )}
+
+        {/* SUBTAB 5: MANAGE INSTAGRAM STORIES */}
+        {activeSubTab === 'stories' && (
+          <div className="admin-content-area animate-fade-in">
+            <AdminStoriesManager />
           </div>
         )}
 
