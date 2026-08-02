@@ -138,3 +138,34 @@ Bhawna Closet
     console.error('Failed to send customer order confirmation email:', err.message);
   }
 };
+
+export const sendInquiryNotificationToAdmin = async (inquiry) => {
+  try {
+    const adminEmail = process.env.ADMIN_EMAIL || 'bhawnacloset.in@gmail.com';
+    const subject = `📞 New Contact Inquiry: ${inquiry.name}`;
+
+    const text = `
+Hello Admin,
+
+A new contact inquiry has been submitted on Bhawna Closet!
+
+Inquiry Details:
+---------------------------------------------
+Name: ${inquiry.name}
+Email: ${inquiry.email}
+Phone: ${inquiry.phone}
+Submitted At: ${inquiry.createdAt || new Date()}
+
+Message:
+---------------------------------------------
+${inquiry.message}
+
+Warm regards,
+Bhawna Closet System
+`;
+
+    await sendEmail(adminEmail, subject, text);
+  } catch (err) {
+    console.error('Failed to send admin inquiry email:', err.message);
+  }
+};

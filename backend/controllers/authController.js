@@ -5,7 +5,7 @@ import { sendSmsOtp } from '../services/smsService.js';
 
 const normalizePhone = (phone) => {
   if (!phone || typeof phone !== 'string') return '';
-  let cleaned = phone.trim();
+  let cleaned = phone.replace(/[^\d+]/g, '').trim();
   if (!cleaned.startsWith('+') && cleaned.length === 10) {
     cleaned = `+91${cleaned}`;
   }

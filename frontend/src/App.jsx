@@ -321,7 +321,14 @@ function AppContent() {
                   type="text"
                   placeholder="Search outfits..."
                   value={searchQuery}
-                  onChange={(e) => { setSearchQuery(e.target.value); setShopPage(1); }}
+                  onChange={(e) => { 
+                    const val = e.target.value;
+                    setSearchQuery(val); 
+                    setShopPage(1); 
+                    if (val.trim() !== '') {
+                      setCategoryFilter('All');
+                    }
+                  }}
                 />
                 {searchQuery && (
                   <button 

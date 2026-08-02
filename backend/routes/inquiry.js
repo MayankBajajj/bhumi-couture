@@ -1,5 +1,6 @@
 import express from 'express';
 import Inquiry from '../models/Inquiry.js';
+import { sendInquiryNotificationToAdmin } from '../services/emailService.js';
 
 const router = express.Router();
 
@@ -26,9 +27,13 @@ router.post('/', async (req, res) => {
     const inquiry = new Inquiry(inquiryData);
     await inquiry.save();
 
+    // Send email notification to admin (bhawnacloset.in@gmail.com)
+    await sendInquiryNotificationToAdmin(inquiry);
+
     res.status(201).json({ message: 'Thank you! Your inquiry has been submitted successfully.', inquiry });
   } catch (error) {
-    res.status(500).json({ message: 'Server error processing inquiry', error: error.message });
+    console.error('Inquiry processing error:', error);
+    res.status(500).json({ message: 'An unexpected error occurred. Please try again.' });
   }
 });
 
