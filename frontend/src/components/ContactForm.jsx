@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Send, Check, Phone, Mail, MapPin, Clock } from 'lucide-react';
+import { request } from '../services/api';
 
 export default function ContactForm() {
   const [formData, setFormData] = useState({
@@ -22,20 +23,14 @@ export default function ContactForm() {
     setSubmitting(true);
     setErrorMsg('');
     try {
-      const response = await fetch('http://localhost:5000/api/inquiries', {
+      await request('/inquiries', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
       });
-      const data = await response.json();
-      if (response.ok) {
-        setSuccess(true);
-        setFormData({ name: '', email: '', phone: '', message: '' });
-      } else {
-        setErrorMsg(data.message || 'Error sending message.');
-      }
+      setSuccess(true);
+      setFormData({ name: '', email: '', phone: '', message: '' });
     } catch (err) {
-      setErrorMsg('Connection error. Please call us directly at 9266991136.');
+      setErrorMsg(err.message || 'Connection error. Please call us directly at 9266991136.');
     } finally {
       setSubmitting(false);
     }
