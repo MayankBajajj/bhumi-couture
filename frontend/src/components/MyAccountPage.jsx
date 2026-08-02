@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { User, Lock, Edit3, Check, AlertTriangle, ListOrdered, KeyRound } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { orderService } from '../services/orderService';
+import { authService } from '../services/authService';
 
 export default function MyAccountPage() {
   const { user, updateUserProfile } = useAuth();
@@ -81,26 +82,11 @@ export default function MyAccountPage() {
 
     setSubmittingPassword(true);
     try {
-      const response = await fetch('http://localhost:5000/api/auth/change-password', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('userToken')}`
-        },
-        body: JSON.stringify({
-          currentPassword: passData.currentPassword,
-          newPassword: passData.newPassword
-        })
-      });
-      const data = await response.json();
-      if (response.ok) {
-        setPassSuccess(true);
-        setPassData({ currentPassword: '', newPassword: '', confirmPassword: '' });
-      } else {
-        setPassError(data.message || 'Failed to change password');
-      }
+      await authService.changePassword(passData.currentPassword, passData.newPassword);
+      setPassSuccess(true);
+      setPassData({ currentPassword: '', newPassword: '', confirmPassword: '' });
     } catch (err) {
-      setPassError('Connection error changing password');
+      setPassError(err.message || 'Connection error changing password');
     } finally {
       setSubmittingPassword(false);
     }
