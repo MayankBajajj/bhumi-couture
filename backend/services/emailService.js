@@ -99,8 +99,11 @@ Bhawna Closet System
       return `
         <tr style="border-bottom: 1px solid #eee;">
           <td style="padding: 10px; text-align: left; vertical-align: middle;">
-            <img src="${imgUrl}" alt="${name}" style="width: 50px; height: 70px; object-fit: cover; border-radius: 4px; border: 1px solid #ddd; margin-right: 12px; display: inline-block; vertical-align: middle;" />
-            <span style="font-weight: bold; vertical-align: middle; color: #333;">${name}</span>
+            <a href="${imgUrl}" target="_blank" style="display: block; margin-bottom: 8px; text-decoration: none;">
+              <img src="${imgUrl}" alt="${name}" style="width: 140px; height: 180px; object-fit: cover; border-radius: 6px; border: 1px solid #ddd; display: block;" />
+              <span style="font-size: 0.75rem; color: #F0548A; display: block; margin-top: 4px; font-weight: bold;">🔍 Click to view full image</span>
+            </a>
+            <span style="font-weight: bold; color: #333; display: block;">${name}</span>
           </td>
           <td style="padding: 10px; text-align: center; vertical-align: middle; color: #555;">
             <strong>${item.size}</strong>${item.color ? ` / Color: ${item.color}` : ''}
