@@ -1,6 +1,7 @@
 import Order from '../models/Order.js';
 import Product from '../models/Product.js';
 import Cart from '../models/Cart.js';
+import { syncOrderToShiprocket } from '../services/shiprocketService.js';
 
 // Create a new order
 export const createOrder = async (req, res, next) => {
@@ -55,11 +56,20 @@ export const createOrder = async (req, res, next) => {
       shippingAddress,
       paymentMethod: paymentMethod || 'COD',
       paymentStatus: 'Pending',
-      status: 'Pending'
+      status: 'Processing',
+      timeline: [
+        { status: 'Pending', note: 'Order initiated via Cash on Delivery.' },
+        { status: 'Processing', note: 'Inventory allocated. Order is preparing for shipment.' }
+      ]
     });
 
     // Clear user's cart in database
     await Cart.findOneAndUpdate({ userId }, { $set: { items: [] } });
+
+    // Sync to Shiprocket in background
+    syncOrderToShiprocket(order._id).catch(err => {
+      console.error(`Background Shiprocket sync failed for order ${order._id}:`, err.message);
+    });
 
     res.status(201).json({
       message: 'Order placed successfully!',

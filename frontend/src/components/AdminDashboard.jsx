@@ -1147,7 +1147,7 @@ export default function AdminDashboard() {
                                     </button>
                                   </>
                                 )}
-                                {order.status === 'Accepted' && (
+                                {['Accepted', 'Processing'].includes(order.status) && (
                                   <button 
                                     className="order-btn-ship" 
                                     onClick={() => handleOrderStatusUpdate(order._id, 'Shipped')}
