@@ -345,7 +345,7 @@ export default function MyAccountPage() {
 
                       <div className="order-card-footer">
                         <div className="footer-meta">
-                          <span>Payment: <strong>{order.paymentMethod} ({order.paymentStatus})</strong></span>
+                          <span>Payment: <strong>{order.paymentMethod} ({order.paymentStatus === 'Refunded' ? 'Refund Initiated' : order.paymentStatus})</strong></span>
                         </div>
                         <div className="footer-total">
                           <span>Total Amount:</span>

@@ -190,6 +190,10 @@ export const syncOrderToShiprocket = async (orderId) => {
 
     const data = await res.json();
     
+    if (!data || (!data.order_id && !data.shipment_id)) {
+      throw new Error(`Shiprocket API responded success but missing order_id/shipment_id. Response: ${JSON.stringify(data)}`);
+    }
+    
     order.shiprocketOrderId = data.order_id;
     order.shiprocketShipmentId = data.shipment_id;
     order.shiprocketSyncStatus = 'Synced';

@@ -127,6 +127,22 @@ export default function CartPage({ onContinueShopping, onSelectProductBySlug }) 
     setCheckingOut(true);
     setOrderError('');
 
+    // Validate that the pincode exists in India Post database
+    try {
+      const pinRes = await fetch(`https://api.postalpincode.in/pincode/${addressForm.pincode.trim()}`);
+      if (pinRes.ok) {
+        const pinData = await pinRes.json();
+        if (pinData && pinData[0] && pinData[0].Status === 'Error') {
+          setOrderError('The entered pin code is invalid or does not exist.');
+          setCheckingOut(false);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          return;
+        }
+      }
+    } catch (err) {
+      console.warn('Pincode verification API call failed or bypassed:', err.message);
+    }
+
     const formattedAddress = `${addressForm.name}, Phone: ${addressForm.phone}, Address: ${addressForm.street}, ${addressForm.city}, ${addressForm.state} - ${addressForm.pincode}`;
 
     const orderData = {
@@ -470,9 +486,10 @@ export default function CartPage({ onContinueShopping, onSelectProductBySlug }) 
                       type="tel"
                       name="phone"
                       value={addressForm.phone}
-                      onChange={handleInputChange}
+                      readOnly
                       placeholder="Enter Mobile Number"
                       required
+                      style={{ backgroundColor: 'rgba(0, 0, 0, 0.05)', cursor: 'not-allowed', color: '#666' }}
                     />
                   </div>
                 </div>

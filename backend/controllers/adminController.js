@@ -369,7 +369,7 @@ export const refundOrder = async (req, res, next) => {
     order.status = 'Cancelled';
     order.timeline.push({
       status: 'Cancelled',
-      note: `Order refunded and cancelled. Refund ID: ${refund.id}. Refunded online amount: ₹${payment.amount}`
+      note: `Refund initiated. The amount of ₹${payment.amount} has been successfully released from our end via Razorpay (Refund ID: ${refund.id}). It typically takes 5-7 business days to reflect in your account depending on your bank.`
     });
 
     // Restore stock inventory
