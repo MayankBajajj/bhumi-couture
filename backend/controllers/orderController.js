@@ -17,6 +17,12 @@ export const createOrder = async (req, res, next) => {
       return res.status(400).json({ message: 'Shipping address is required' });
     }
 
+    // Validate 6-digit Indian PIN code format at the end of the address
+    const pincodeMatch = shippingAddress.trim().match(/-\s*([1-9][0-9]{5})$/);
+    if (!pincodeMatch) {
+      return res.status(400).json({ message: 'Please provide a valid 6-digit pin code in the shipping address.' });
+    }
+
     // Verify stock and update inventory in a transaction-like loop
     for (const item of items) {
       const product = await Product.findById(item.productId);

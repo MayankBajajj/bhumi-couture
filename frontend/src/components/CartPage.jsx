@@ -117,6 +117,13 @@ export default function CartPage({ onContinueShopping, onSelectProductBySlug }) 
       return;
     }
 
+    const pincodeRegex = /^[1-9][0-9]{5}$/;
+    if (!pincodeRegex.test(addressForm.pincode.trim())) {
+      setOrderError('Please enter a valid 6-digit pin code.');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
     setCheckingOut(true);
     setOrderError('');
 

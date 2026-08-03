@@ -34,6 +34,12 @@ export const createRazorpayOrder = async (req, res, next) => {
       return res.status(400).json({ message: 'Shipping address is required' });
     }
 
+    // Validate 6-digit Indian PIN code format at the end of the address
+    const pincodeMatch = shippingAddress.trim().match(/-\s*([1-9][0-9]{5})$/);
+    if (!pincodeMatch) {
+      return res.status(400).json({ message: 'Please provide a valid 6-digit pin code in the shipping address.' });
+    }
+
     // Recalculate price on backend and check stock availability
     let calculatedAmount = 0;
     for (const item of items) {
