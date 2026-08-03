@@ -58,7 +58,7 @@ export const sendOrderNotificationToAdmin = async (order) => {
 
     const itemsText = populatedOrder.items.map(item => {
       const name = item.productId ? item.productId.name : 'Unknown Product';
-      return `- ${name} (${item.size}) x ${item.quantity} - ₹${item.price * item.quantity}`;
+      return `- ${name} (${item.size}${item.color ? ` / Color: ${item.color}` : ''}) x ${item.quantity} - ₹${item.price * item.quantity}`;
     }).join('\n');
 
     const text = `
@@ -102,7 +102,7 @@ export const sendOrderConfirmationToCustomer = async (order, customerEmail) => {
 
     const itemsText = populatedOrder.items.map(item => {
       const name = item.productId ? item.productId.name : 'Outfit';
-      return `- ${name} (${item.size}) x ${item.quantity}`;
+      return `- ${name} (${item.size}${item.color ? ` / Color: ${item.color}` : ''}) x ${item.quantity}`;
     }).join('\n');
 
     const text = `

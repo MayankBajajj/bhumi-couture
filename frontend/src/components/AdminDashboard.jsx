@@ -1102,7 +1102,7 @@ export default function AdminDashboard() {
                               <div className="order-items-col" style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
                                 {(order.items || []).map((item, idx) => (
                                   <div key={idx} className="order-item-list-row" style={{ fontSize: '0.85rem', display: 'flex', gap: '0.5rem' }}>
-                                    <span style={{ color: 'var(--text-muted)' }}>{item.productId ? item.productId.name : 'Unknown Product'} ({item.size})</span>
+                                    <span style={{ color: 'var(--text-muted)' }}>{item.productId ? item.productId.name : 'Unknown Product'} ({item.size}{item.color ? ` / ${item.color}` : ''})</span>
                                     <strong style={{ color: 'var(--dark-charcoal)' }}>x{item.quantity}</strong>
                                   </div>
                                 ))}

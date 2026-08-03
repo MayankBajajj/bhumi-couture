@@ -48,8 +48,12 @@ export default function ProductDetailPage({ productSlug, onBack, onSelectProduct
           setSelectedSize(data.sizes[0].size);
         }
 
-        if (data.colors && data.colors.length > 0) {
+        if (data.colorName) {
+          setSelectedColor(data.colorName);
+        } else if (data.colors && data.colors.length > 0) {
           setSelectedColor(data.colors[0]);
+        } else {
+          setSelectedColor('');
         }
 
         // Fetch related products (same category, filter out current product)
