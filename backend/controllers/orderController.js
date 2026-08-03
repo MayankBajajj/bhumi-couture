@@ -2,6 +2,7 @@ import Order from '../models/Order.js';
 import Product from '../models/Product.js';
 import Cart from '../models/Cart.js';
 import { syncOrderToShiprocket } from '../services/shiprocketService.js';
+import { sendOrderNotificationToAdmin, sendOrderConfirmationToCustomer } from '../services/emailService.js';
 
 // Create a new order
 export const createOrder = async (req, res, next) => {
@@ -76,6 +77,17 @@ export const createOrder = async (req, res, next) => {
     syncOrderToShiprocket(order._id).catch(err => {
       console.error(`Background Shiprocket sync failed for order ${order._id}:`, err.message);
     });
+
+    // Trigger emails in background
+    sendOrderNotificationToAdmin(order).catch(err => {
+      console.error(`Failed to send order email notification to admin:`, err.message);
+    });
+
+    if (req.user && req.user.email) {
+      sendOrderConfirmationToCustomer(order, req.user.email).catch(err => {
+        console.error(`Failed to send order email confirmation to customer:`, err.message);
+      });
+    }
 
     res.status(201).json({
       message: 'Order placed successfully!',

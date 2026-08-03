@@ -49,7 +49,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const data = await authService.login(phone, password);
       localStorage.setItem('userToken', data.token);
-      setUser({ _id: data._id, name: data.name, phone: data.phone });
+      setUser({ _id: data._id, name: data.name, email: data.email, phone: data.phone });
       setLoading(false);
       return data;
     } catch (error) {
@@ -63,7 +63,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const data = await authService.loginOtp(phone, otp);
       localStorage.setItem('userToken', data.token);
-      setUser({ _id: data._id, name: data.name, phone: data.phone });
+      setUser({ _id: data._id, name: data.name, email: data.email, phone: data.phone });
       setLoading(false);
       return data;
     } catch (error) {
@@ -72,12 +72,12 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const signup = async (name, phone, password, otp) => {
+  const signup = async (name, email, phone, password, otp) => {
     setLoading(true);
     try {
-      const data = await authService.register(name, phone, password, otp);
+      const data = await authService.register(name, email, phone, password, otp);
       localStorage.setItem('userToken', data.token);
-      setUser({ _id: data._id, name: data.name, phone: data.phone });
+      setUser({ _id: data._id, name: data.name, email: data.email, phone: data.phone });
       setLoading(false);
       return data;
     } catch (error) {
@@ -88,7 +88,7 @@ export const AuthProvider = ({ children }) => {
 
   const loginWithToken = (data) => {
     localStorage.setItem('userToken', data.token);
-    setUser({ _id: data._id, name: data.name, phone: data.phone });
+    setUser({ _id: data._id, name: data.name, email: data.email, phone: data.phone });
   };
 
   const logout = () => {

@@ -46,12 +46,21 @@ export const sendSmsOtp = async (phone, otp) => {
 
     if (data.status === 0) {
       console.error('[BLACKSMS API REJECTED]:', data);
-      throw new Error('Please enter a valid 10-digit phone number');
+      throw new Error(data.message || 'The SMS gateway rejected the dispatch request. Please check the phone number.');
     }
 
     return { success: true, data };
   } catch (err) {
     console.error('Error sending SMS via BlackSMS:', err.message);
-    throw new Error('Please enter a valid 10-digit phone number');
+    
+    // In local development, fall back to printing the OTP in the terminal console so testing is not blocked
+    if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
+      console.log(`\n=======================================================`);
+      console.log(`[DEV SMS FALLBACK] OTP FOR ${cleanPhone} IS: ${otp}`);
+      console.log(`=======================================================\n`);
+      return { success: true, mode: 'fallback-console' };
+    }
+    
+    throw new Error('Failed to connect to the SMS gateway. Please check your network connection.');
   }
 };

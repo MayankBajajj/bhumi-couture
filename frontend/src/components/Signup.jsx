@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { User, Lock, ArrowRight, AlertTriangle, Eye, EyeOff, Phone } from 'lucide-react';
+import { User, Lock, ArrowRight, AlertTriangle, Eye, EyeOff, Phone, Mail } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { authService } from '../services/authService';
 
@@ -7,6 +7,7 @@ export default function Signup({ onSwitchToLogin, onSignupSuccess }) {
   const { signup } = useAuth();
   const [formData, setFormData] = useState({
     name: '',
+    email: '',
     phone: '',
     password: '',
     confirmPassword: ''
@@ -29,10 +30,16 @@ export default function Signup({ onSwitchToLogin, onSignupSuccess }) {
   // Step 1: Request SMS OTP via Backend API
   const handleSendOtp = async (e) => {
     e.preventDefault();
-    const { name, phone, password, confirmPassword } = formData;
+    const { name, email, phone, password, confirmPassword } = formData;
     
-    if (!name || !phone || !password || !confirmPassword) {
+    if (!name || !email || !phone || !password || !confirmPassword) {
       setErrorMsg('Please fill in all fields');
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      setErrorMsg('Please enter a valid email address');
       return;
     }
     
@@ -60,7 +67,7 @@ export default function Signup({ onSwitchToLogin, onSignupSuccess }) {
       setShowOtpStep(true);
     } catch (err) {
       console.error('SMS send error:', err);
-      setErrorMsg(err.message || 'Please enter a valid 10-digit phone number.');
+      setErrorMsg(err.message || 'Failed to send verification SMS. Please check your network connection.');
     } finally {
       setSendingOtp(false);
     }
@@ -78,7 +85,7 @@ export default function Signup({ onSwitchToLogin, onSignupSuccess }) {
     setErrorMsg('');
 
     try {
-      await signup(formData.name, formData.phone, formData.password, otpCode);
+      await signup(formData.name, formData.email, formData.phone, formData.password, otpCode);
       
       if (onSignupSuccess) {
         onSignupSuccess();
@@ -120,6 +127,22 @@ export default function Signup({ onSwitchToLogin, onSignupSuccess }) {
                   value={formData.name}
                   onChange={handleInputChange}
                   placeholder="Enter Full Name"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="form-field">
+              <label htmlFor="signup-email">Email Address</label>
+              <div className="input-wrapper">
+                <Mail size={18} className="input-icon" />
+                <input
+                  id="signup-email"
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  placeholder="Enter Email Address"
                   required
                 />
               </div>

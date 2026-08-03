@@ -1,6 +1,8 @@
 import Order from '../models/Order.js';
 import WebhookLog from '../models/WebhookLog.js';
+import User from '../models/User.js';
 import { syncTrackingFromShiprocket } from '../services/shiprocketService.js';
+import { sendShippingNotificationToCustomer } from '../services/emailService.js';
 
 export const shiprocketWebhook = async (req, res, next) => {
   try {
@@ -58,7 +60,20 @@ export const shiprocketWebhook = async (req, res, next) => {
     
     // Map Shiprocket statuses to our local Order statuses
     if (shipStatus === 'shipped' || shipStatus === 'dispatched') {
+      const isNewlyShipped = order.status !== 'Shipped';
       order.status = 'Shipped';
+      
+      if (isNewlyShipped) {
+        User.findById(order.userId).then(u => {
+          if (u && u.email) {
+            sendShippingNotificationToCustomer(order, u.email).catch(err => {
+              console.error('Failed to send shipping notification email to customer:', err.message);
+            });
+          }
+        }).catch(err => {
+          console.error('Failed to find user for shipping email:', err.message);
+        });
+      }
     } else if (shipStatus === 'delivered') {
       order.status = 'Delivered';
       order.paymentStatus = 'Paid'; // If delivered, mark COD as paid!

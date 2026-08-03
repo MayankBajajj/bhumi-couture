@@ -253,3 +253,59 @@ Bhawna Closet System
     console.error('Failed to send admin inquiry email:', err.message);
   }
 };
+
+export const sendRefundNotificationToCustomer = async (order, amount, refundId, customerEmail) => {
+  try {
+    if (!customerEmail) return;
+    const subject = `❌ Order Refunded & Cancelled - Bhawna Closet #${order._id.toString().slice(-8).toUpperCase()}`;
+    const text = `
+Dear Customer,
+
+Your order #${order._id.toString().slice(-8).toUpperCase()} has been refunded and cancelled.
+
+Refund Summary:
+---------------------------------------------
+Refund ID: ${refundId}
+Refunded Amount: ₹${amount}
+Status: Refund Initiated (Typically takes 5-7 business days to reflect in your bank account depending on your bank)
+
+If you have any questions, feel free to reply to this email or contact us at bhawnacloset.in@gmail.com.
+
+With love,
+Bhawna Closet
+`;
+    await sendEmail(customerEmail, subject, text);
+  } catch (err) {
+    console.error('Failed to send refund customer email:', err.message);
+  }
+};
+
+export const sendShippingNotificationToCustomer = async (order, customerEmail) => {
+  try {
+    if (!customerEmail) return;
+    const subject = `🚚 Your Bhawna Closet Order is Shipped! #${order._id.toString().slice(-8).toUpperCase()}`;
+    const trackingInfo = order.trackingNumber 
+      ? `Courier Partner: ${order.courierName}\nTracking Number: ${order.trackingNumber}\nTracking Link: ${order.trackingUrl || 'N/A'}`
+      : 'Courier details are being processed.';
+
+    const text = `
+Dear Customer,
+
+Exciting news! Your Bhawna Closet order #${order._id.toString().slice(-8).toUpperCase()} has been shipped and is on its way to you!
+
+Shipping & Tracking Details:
+---------------------------------------------
+${trackingInfo}
+
+You can track your package progress directly using the tracking link above or on your Bhawna Closet dashboard under My Account.
+
+Thank you for shopping with us!
+
+With love,
+Bhawna Closet
+`;
+    await sendEmail(customerEmail, subject, text);
+  } catch (err) {
+    console.error('Failed to send shipping customer email:', err.message);
+  }
+};

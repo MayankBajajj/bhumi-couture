@@ -9,6 +9,7 @@ import Razorpay from 'razorpay';
 import { generateToken } from '../services/userService.js';
 import { isCloudinaryConfigured } from '../config/cloudinary.js';
 import { syncOrderToShiprocket } from '../services/shiprocketService.js';
+import { sendRefundNotificationToCustomer, sendShippingNotificationToCustomer } from '../services/emailService.js';
 import {
   createProductService,
   updateProductService,
@@ -314,6 +315,20 @@ export const updateOrderStatus = async (req, res, next) => {
     }
 
     await order.save();
+
+    // Trigger customer shipping tracking email notification if status changes to Shipped in the background
+    if (status === 'Shipped' && previousStatus !== 'Shipped') {
+      User.findById(order.userId).then(u => {
+        if (u && u.email) {
+          sendShippingNotificationToCustomer(order, u.email).catch(err => {
+            console.error('Failed to send manual shipping notification email to customer:', err.message);
+          });
+        }
+      }).catch(err => {
+        console.error('Failed to find user for manual shipping email:', err.message);
+      });
+    }
+
     res.json({ message: 'Order status updated successfully', order });
   } catch (error) {
     res.status(500);
@@ -382,6 +397,17 @@ export const refundOrder = async (req, res, next) => {
     }
 
     await order.save();
+
+    // Trigger customer email notification about refund in the background
+    User.findById(order.userId).then(u => {
+      if (u && u.email) {
+        sendRefundNotificationToCustomer(order, payment.amount, refund.id, u.email).catch(err => {
+          console.error('Failed to send refund email notification to customer:', err.message);
+        });
+      }
+    }).catch(err => {
+      console.error('Failed to find user for refund email notification:', err.message);
+    });
 
     res.json({ message: 'Order refunded and cancelled successfully', order });
   } catch (error) {

@@ -22,10 +22,10 @@ export const authService = {
     });
   },
 
-  register: async (name, phone, password, otp) => {
+  register: async (name, email, phone, password, otp) => {
     return await request('/auth/signup', {
       method: 'POST',
-      body: JSON.stringify({ name, phone, password, otp })
+      body: JSON.stringify({ name, email, phone, password, otp })
     });
   },
 

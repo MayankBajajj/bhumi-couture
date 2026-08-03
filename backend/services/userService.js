@@ -7,15 +7,16 @@ export const generateToken = (id) => {
   });
 };
 
-export const registerUser = async (name, phone, password) => {
+export const registerUser = async (name, email, phone, password) => {
   const userExists = await User.findOne({ phone });
   if (userExists) {
     throw new Error('Phone number is already registered');
   }
-  const user = await User.create({ name, phone, password });
+  const user = await User.create({ name, email, phone, password });
   return {
     _id: user._id,
     name: user.name,
+    email: user.email,
     phone: user.phone,
     token: generateToken(user._id)
   };
@@ -27,6 +28,7 @@ export const loginUser = async (phone, password) => {
     return {
       _id: user._id,
       name: user.name,
+      email: user.email,
       phone: user.phone,
       token: generateToken(user._id)
     };

@@ -25,6 +25,12 @@ export const sendOtpController = async (req, res, next) => {
       return res.status(400).json({ message: 'Please enter a valid 10-digit phone number' });
     }
 
+    // Check if phone number is already registered in database
+    const userExists = await User.findOne({ phone: formattedPhone });
+    if (userExists) {
+      return res.status(400).json({ message: 'This phone number is already registered. Please log in instead.' });
+    }
+
     // Generate 6-digit numeric OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
@@ -40,7 +46,7 @@ export const sendOtpController = async (req, res, next) => {
       await sendSmsOtp(formattedPhone, otp);
     } catch (smsErr) {
       console.error('[SMS GATEWAY ERROR]:', smsErr.message);
-      return res.status(400).json({ message: 'Please enter a valid 10-digit phone number' });
+      return res.status(400).json({ message: smsErr.message });
     }
 
     res.json({ message: 'Verification OTP sent to your phone number' });
@@ -52,10 +58,16 @@ export const sendOtpController = async (req, res, next) => {
 // 2. Register user controller (verifies OTP)
 export const register = async (req, res, next) => {
   try {
-    const { name, phone, password, otp } = req.body;
-    if (!name || !phone || !password || !otp) {
+    const { name, email, phone, password, otp } = req.body;
+    if (!name || !email || !phone || !password || !otp) {
       return res.status(400).json({ message: 'Please fill in all fields including the OTP' });
     }
+    
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      return res.status(400).json({ message: 'Please enter a valid email address' });
+    }
+
     if (password.length < 6) {
       return res.status(400).json({ message: 'Password must be at least 6 characters' });
     }
@@ -68,7 +80,7 @@ export const register = async (req, res, next) => {
       return res.status(400).json({ message: 'Invalid or expired OTP code' });
     }
 
-    const result = await registerUser(name, formattedPhone, password);
+    const result = await registerUser(name, email.trim(), formattedPhone, password);
 
     // Delete OTP record after successful registration
     await Otp.deleteOne({ phone: formattedPhone });
@@ -151,6 +163,14 @@ export const updateProfile = async (req, res, next) => {
     
     user.name = req.body.name || user.name;
     
+    if (req.body.email) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(req.body.email.trim())) {
+        return res.status(400).json({ message: 'Please enter a valid email address' });
+      }
+      user.email = req.body.email.trim().toLowerCase();
+    }
+    
     if (req.body.phone && req.body.phone !== user.phone) {
       const formattedPhone = normalizePhone(req.body.phone);
       const phoneExists = await User.findOne({ phone: formattedPhone });
@@ -164,6 +184,7 @@ export const updateProfile = async (req, res, next) => {
     res.json({
       _id: updatedUser._id,
       name: updatedUser.name,
+      email: updatedUser.email,
       phone: updatedUser.phone
     });
   } catch (error) {

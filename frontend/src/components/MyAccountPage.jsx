@@ -8,7 +8,7 @@ export default function MyAccountPage() {
   const { user, updateUserProfile } = useAuth();
   
   // Profile edit states
-  const [profileData, setProfileData] = useState({ name: user?.name || '', phone: user?.phone || '' });
+  const [profileData, setProfileData] = useState({ name: user?.name || '', email: user?.email || '', phone: user?.phone || '' });
   const [editingProfile, setEditingProfile] = useState(false);
   const [profileSuccess, setProfileSuccess] = useState(false);
   const [profileError, setProfileError] = useState('');
@@ -109,7 +109,10 @@ export default function MyAccountPage() {
               <div className="card-header">
                 <h3>Profile Information</h3>
                 {!editingProfile && (
-                  <button className="edit-btn" onClick={() => setEditingProfile(true)}>
+                  <button className="edit-btn" onClick={() => {
+                    setProfileData({ name: user?.name || '', email: user?.email || '', phone: user?.phone || '' });
+                    setEditingProfile(true);
+                  }}>
                     <Edit3 size={16} /> Edit Profile
                   </button>
                 )}
@@ -140,6 +143,16 @@ export default function MyAccountPage() {
                     />
                   </div>
                   <div className="form-group">
+                    <label>Email Address</label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={profileData.email}
+                      onChange={handleProfileChange}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
                     <label>Phone Number</label>
                     <input
                       type="tel"
@@ -158,7 +171,7 @@ export default function MyAccountPage() {
                       className="btn btn-outline btn-cancel"
                       onClick={() => {
                         setEditingProfile(false);
-                        setProfileData({ name: user?.name || '', phone: user?.phone || '' });
+                        setProfileData({ name: user?.name || '', email: user?.email || '', phone: user?.phone || '' });
                       }}
                     >
                       Cancel
@@ -170,6 +183,10 @@ export default function MyAccountPage() {
                   <div className="info-row">
                     <span className="info-label">Full Name</span>
                     <span className="info-val">{user?.name}</span>
+                  </div>
+                  <div className="info-row">
+                    <span className="info-label">Email Address</span>
+                    <span className="info-val">{user?.email || 'Not Configured'}</span>
                   </div>
                   <div className="info-row">
                     <span className="info-label">Phone Number</span>
